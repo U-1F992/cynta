@@ -3,104 +3,58 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-static void end_tracking(cynta_stream_t *stream)
+#define PUSH(stack, value) ((stack)[(stack##_size)++] = (value))
+#define POP(stack) ((stack)[--(stack##_size)])
+
+cynta_stream_error_t cynta_stream_push_checkpoint(cynta_stream_t *stream)
 {
     if (stream == NULL)
     {
-        return;
+        return CYNTA_STREAM_ERROR_NULL_POINTER;
     }
 
-    free(stream->history);
-    stream->history = NULL;
-    stream->history_size = 0;
-    stream->history_index = 0;
+    if (stream->checkpoints_size >= CYNTA_STREAM_BACKTRACK_CHECKPOINTS_CAPACITY)
+    {
+        return CYNTA_STREAM_ERROR_OUT_OF_CAPACITY;
+    }
 
-    free(stream->checkpoints);
-    stream->checkpoints = NULL;
-    stream->checkpoints_size = 0;
+    PUSH(stream->checkpoints, stream->history_index);
+
+    return CYNTA_STREAM_SUCCESS;
 }
 
-void cynta_stream_push_checkpoint(cynta_stream_t *stream)
+cynta_stream_error_t cynta_stream_rewind(cynta_stream_t *stream)
 {
     if (stream == NULL)
     {
-        return;
+        return CYNTA_STREAM_ERROR_NULL_POINTER;
     }
 
-    // Push
-    if ((stream->checkpoints = (size_t *)realloc(stream->checkpoints, sizeof(size_t) * (++stream->checkpoints_size))) == NULL)
-    {
-        end_tracking(stream);
-        return;
-    }
-    stream->checkpoints[stream->checkpoints_size - 1] = stream->history_index;
-}
-
-void cynta_stream_rewind(cynta_stream_t *stream)
-{
-    if (stream == NULL ||
-        stream->checkpoints_size == 0)
-    {
-        return;
-    }
-
-    // Pop
-    stream->history_index = stream->checkpoints[stream->checkpoints_size - 1];
-    stream->checkpoints_size--;
     if (stream->checkpoints_size == 0)
     {
-        free(stream->checkpoints);
-        stream->checkpoints = NULL;
+        return CYNTA_STREAM_ERROR_NO_CHECKPOINT;
+    }
 
-        // At the peek of the history
-        if (stream->history_index == stream->history_size)
-        {
-            free(stream->history);
-            stream->history = NULL;
-            stream->history_size = 0;
-            stream->history_index = 0;
-        }
-    }
-    else
-    {
-        if ((stream->checkpoints = (size_t *)realloc(stream->checkpoints, sizeof(size_t) * stream->checkpoints_size)) == NULL)
-        {
-            end_tracking(stream);
-        }
-    }
+    stream->history_index = POP(stream->checkpoints);
+
+    return CYNTA_STREAM_SUCCESS;
 }
 
-void cynta_stream_discard_checkpoint(cynta_stream_t *stream)
+cynta_stream_error_t cynta_stream_discard_checkpoint(cynta_stream_t *stream)
 {
-    if (stream == NULL ||
-        stream->checkpoints_size == 0)
+    if (stream == NULL)
     {
-        return;
+        return CYNTA_STREAM_ERROR_NULL_POINTER;
     }
 
-    // Discard
-    stream->checkpoints_size--;
     if (stream->checkpoints_size == 0)
     {
-        free(stream->checkpoints);
-        stream->checkpoints = NULL;
+        return CYNTA_STREAM_ERROR_NO_CHECKPOINT;
+    }
 
-        // At the peek of the history
-        if (stream->history_index == stream->history_size)
-        {
-            free(stream->history);
-            stream->history = NULL;
-            stream->history_size = 0;
-            stream->history_index = 0;
-        }
-    }
-    else
-    {
-        if ((stream->checkpoints = (size_t *)realloc(stream->checkpoints, sizeof(size_t) * stream->checkpoints_size)) == NULL)
-        {
-            end_tracking(stream);
-        }
-    }
+    POP(stream->checkpoints);
+
+    return CYNTA_STREAM_SUCCESS;
 }
 
 cynta_stream_error_t cynta_stream_next(cynta_stream_t *stream, uint8_t *out)
@@ -111,25 +65,13 @@ cynta_stream_error_t cynta_stream_next(cynta_stream_t *stream, uint8_t *out)
         return CYNTA_STREAM_ERROR_NULL_POINTER;
     }
 
-    uint8_t ret;
-    if (stream->history != NULL &&
-        stream->history_index < stream->history_size)
+    if (stream->history_index < stream->history_size)
     {
-        ret = stream->history[(stream->history_index)++];
-
-        bool ran_out_of_history = stream->history_index == stream->history_size;
-        bool no_longer_any_markers_left = stream->checkpoints_size == 0;
-        if (ran_out_of_history && no_longer_any_markers_left)
-        {
-            free(stream->history);
-            stream->history = NULL;
-            stream->history_size = 0;
-            stream->history_index = 0;
-        }
+        *out = stream->history[stream->history_index++];
     }
     else
     {
-        cynta_stream_error_t err = stream->next(stream, &ret);
+        cynta_stream_error_t err = stream->next(stream, out);
         if (err != CYNTA_STREAM_SUCCESS)
         {
             return err;
@@ -138,18 +80,16 @@ cynta_stream_error_t cynta_stream_next(cynta_stream_t *stream, uint8_t *out)
         // Still need history
         if (stream->checkpoints_size != 0)
         {
-            // Push
-            if ((stream->history = (uint8_t *)realloc(stream->history, sizeof(uint8_t) * (++stream->history_size))) == NULL)
+            if (stream->history_size >= CYNTA_STREAM_BACKTRACK_HISTORY_CAPACITY)
             {
-                end_tracking(stream);
-                return CYNTA_STREAM_ERROR_MEMORY_ALLOCATION;
+                return CYNTA_STREAM_ERROR_OUT_OF_CAPACITY;
             }
-            stream->history[stream->history_size - 1] = ret;
+
+            PUSH(stream->history, *out);
             stream->history_index++;
         }
     }
 
-    *out = ret;
     return CYNTA_STREAM_SUCCESS;
 }
 
@@ -160,24 +100,10 @@ cynta_stream_error_t cynta_stream_init(cynta_stream_t *stream)
         return CYNTA_STREAM_ERROR_NULL_POINTER;
     }
 
-    stream->history = NULL;
     stream->history_size = 0;
     stream->history_index = 0;
 
-    stream->checkpoints = NULL;
     stream->checkpoints_size = 0;
-
-    return CYNTA_STREAM_SUCCESS;
-}
-
-cynta_stream_error_t cynta_stream_deinit(cynta_stream_t *stream)
-{
-    if (stream == NULL)
-    {
-        return CYNTA_STREAM_ERROR_NULL_POINTER;
-    }
-
-    end_tracking(stream);
 
     return CYNTA_STREAM_SUCCESS;
 }

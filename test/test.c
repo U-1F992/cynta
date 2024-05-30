@@ -54,8 +54,6 @@ void test_stream(void)
     assert(CYNTA_STREAM_SUCCESS == cynta_stream_next((cynta_stream_t *)&stream, &out) && out == 7);
 
     assert(CYNTA_STREAM_ERROR_END_OF_STREAM == cynta_stream_next((cynta_stream_t *)&stream, &out));
-
-    assert(CYNTA_STREAM_SUCCESS == cynta_stream_deinit((cynta_stream_t *)&stream));
 }
 
 void test_parser_uint8(cynta_parser_t *parser,
@@ -135,7 +133,6 @@ cleanup_out:
 
 cleanup_parser_stream:
     cynta_parser_delete(parser);
-    assert(CYNTA_STREAM_SUCCESS == cynta_stream_deinit((cynta_stream_t *)&stream));
 
     if (!test_failure)
     {
