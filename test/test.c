@@ -215,21 +215,24 @@ static size_t test_sequence(void)
         size_t expected_out_size;
     } test_case_t;
 
-    test_case_t test_cases[] = {{.parser = cynta_sequence(cynta_value(127),
+    test_case_t test_cases[] = {{.parser = cynta_sequence(2,
+                                                          cynta_value(127),
                                                           cynta_value(128)),
                                  .stream = (uint8_t[]){127, 128},
                                  .stream_size = 2,
                                  .expected = CYNTA_PARSER_SUCCESS,
                                  .expected_out = (uint8_t[]){127, 128},
                                  .expected_out_size = 2},
-                                {.parser = cynta_sequence(cynta_any(),
+                                {.parser = cynta_sequence(2,
+                                                          cynta_any(),
                                                           cynta_value(128)),
                                  .stream = (uint8_t[]){127, 128},
                                  .stream_size = 2,
                                  .expected = CYNTA_PARSER_SUCCESS,
                                  .expected_out = (uint8_t[]){127, 128},
                                  .expected_out_size = 2},
-                                {.parser = cynta_sequence(cynta_any(),
+                                {.parser = cynta_sequence(2,
+                                                          cynta_any(),
                                                           cynta_value(128)),
                                  .stream = (uint8_t[]){127, 129},
                                  .stream_size = 2,
@@ -374,9 +377,10 @@ static size_t test_complex_examples(void)
         size_t expected_out_size;
     } test_case_t;
 
-    test_case_t test_cases[] = {{.parser = cynta_sequence(cynta_value(0xAB),
-                                                          cynta_sequence(cynta_many(cynta_value(128)),
-                                                                         cynta_value(129))),
+    test_case_t test_cases[] = {{.parser = cynta_sequence(3,
+                                                          cynta_value(0xAB),
+                                                          cynta_many(cynta_value(128)),
+                                                          cynta_value(129)),
                                  .stream = (uint8_t[]){0xAB, 128, 128, 128, 129},
                                  .stream_size = 5,
                                  .expected = CYNTA_PARSER_SUCCESS,

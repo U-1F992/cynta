@@ -47,6 +47,22 @@ extern "C"
 #define CYNTA_GLOBAL_POOL_MANY_CAPACITY 256
 #endif
 
+#ifndef CYNTA_GLOBAL_POOL_TRY_CAPACITY
+#define CYNTA_GLOBAL_POOL_TRY_CAPACITY 256
+#endif
+
+#ifndef CYNTA_GLOBAL_POOL_CHOICE_CAPACITY
+#define CYNTA_GLOBAL_POOL_CHOICE_CAPACITY 256
+#endif
+
+#ifndef CYNTA_SEQUENCE_VA_ARGS_CAPACITY
+#define CYNTA_SEQUENCE_VA_ARGS_CAPACITY 256
+#endif
+
+#ifndef CYNTA_CHOICE_VA_ARGS_CAPACITY
+#define CYNTA_CHOICE_VA_ARGS_CAPACITY 256
+#endif
+
     /****************************************************************************************************/
     /* stream                                                                                           */
     /****************************************************************************************************/
@@ -214,20 +230,21 @@ extern "C"
     {
         cynta_parser_t base;
 
-        cynta_parser_t *parsers[2];
+        cynta_parser_t *parsers[CYNTA_SEQUENCE_VA_ARGS_CAPACITY];
+        size_t parsers_size;
         cynta_uint8_array_t incoming_buffer;
     } cynta_sequence_t;
 
-    cynta_parser_error_t cynta_sequence_init(cynta_sequence_t *, cynta_parser_t *, cynta_parser_t *);
+    cynta_parser_error_t cynta_sequence_init(cynta_sequence_t *, size_t, ...);
 
     extern cynta_sequence_t __cynta_global_pool_sequence[CYNTA_GLOBAL_POOL_SEQUENCE_CAPACITY];
     extern size_t __cynta_global_pool_sequence_index;
 
-#define cynta_sequence(p0, p1) (__cynta_global_pool_sequence_index >= CYNTA_GLOBAL_POOL_SEQUENCE_CAPACITY                                                    \
-                                    ? NULL                                                                                                                   \
-                                : cynta_sequence_init(&__cynta_global_pool_sequence[__cynta_global_pool_sequence_index], (p0), (p1)) != CYNTA_PARSER_SUCCESS \
-                                    ? NULL                                                                                                                   \
-                                    : (cynta_parser_t *)&__cynta_global_pool_sequence[__cynta_global_pool_sequence_index++])
+#define cynta_sequence(size, ...) (__cynta_global_pool_sequence_index >= CYNTA_GLOBAL_POOL_SEQUENCE_CAPACITY                                                           \
+                                       ? NULL                                                                                                                          \
+                                   : cynta_sequence_init(&__cynta_global_pool_sequence[__cynta_global_pool_sequence_index], size, __VA_ARGS__) != CYNTA_PARSER_SUCCESS \
+                                       ? NULL                                                                                                                          \
+                                       : (cynta_parser_t *)&__cynta_global_pool_sequence[__cynta_global_pool_sequence_index++])
 
 #endif
 
@@ -283,6 +300,56 @@ extern "C"
                        : cynta_many_init(&__cynta_global_pool_many[__cynta_global_pool_many_index], (p)) != CYNTA_PARSER_SUCCESS \
                            ? NULL                                                                                                \
                            : (cynta_parser_t *)&__cynta_global_pool_many[__cynta_global_pool_many_index++])
+
+    /****************************************************************************************************/
+    /* parser/try                                                                                       */
+    /****************************************************************************************************/
+
+#if 0 < CYNTA_GLOBAL_POOL_TRY_CAPACITY
+
+    typedef struct cynta_try_t {
+        cynta_parser_t base;
+
+        cynta_parser_t *parser;
+    } cynta_try_t;
+
+    cynta_parser_error_t cynta_try_init(cynta_try_t *, cynta_parser_t *);
+
+    extern cynta_try_t __cynta_global_pool_try[CYNTA_GLOBAL_POOL_TRY_CAPACITY];
+    extern size_t __cynta_global_pool_try_index;
+
+#define cynta_try(p) (__cynta_global_pool_try_index >= CYNTA_GLOBAL_POOL_TRY_CAPACITY                                        \
+                          ? NULL                                                                                             \
+                      : cynta_try_init(&__cynta_global_pool_try[__cynta_global_pool_try_index], (p)) != CYNTA_PARSER_SUCCESS \
+                          ? NULL                                                                                             \
+                          : (cynta_parser_t *)&__cynta_global_pool_try[__cynta_global_pool_try_index++])
+
+#endif
+
+    /****************************************************************************************************/
+    /* parser/choice                                                                                    */
+    /****************************************************************************************************/
+
+#if 0 < CYNTA_GLOBAL_POOL_CHOICE_CAPACITY
+
+    typedef struct cynta_choice_t {
+        cynta_parser_t base;
+
+        cynta_parser_t *parsers[CYNTA_CHOICE_VA_ARGS_CAPACITY];
+        size_t parsers_size;
+    } cynta_choice_t;
+
+    cynta_parser_error_t cynta_choice_init(cynta_choice_t *, size_t, ...);
+
+    extern cynta_choice_t __cynta_global_pool_choice[CYNTA_GLOBAL_POOL_CHOICE_CAPACITY];
+    extern size_t __cynta_global_pool_choice_index;
+
+#define cynta_choice(size, ...) (__cynta_global_pool_choice_index >= CYNTA_GLOBAL_POOL_CHOICE_CAPACITY                                                         \
+                                     ? NULL                                                                                                                    \
+                                 : cynta_choice_init(&__cynta_global_pool_choice[__cynta_global_pool_choice_index], size, __VA_ARGS__) != CYNTA_PARSER_SUCCESS \
+                                     ? NULL                                                                                                                    \
+                                     : (cynta_parser_t *)&__cynta_global_pool_choice[__cynta_global_pool_choice_index++])
+#endif
 
 #endif
 
