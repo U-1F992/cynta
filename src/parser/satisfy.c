@@ -1,13 +1,14 @@
-#include <cynta/parser/satisfy.h>
-#include <cynta/uint8_array.h>
+#include <cynta.h>
 
-cynta_satisfy_parser_t __cynta_satisfy_pool[CYNTA_SATISFY_POOL_CAPACITY];
+#if 0 < CYNTA_SATISFY_POOL_CAPACITY + CYNTA_ANY_POOL_CAPACITY + CYNTA_VALUE_POOL_CAPACITY
+
+cynta_satisfy_t __cynta_satisfy_pool[CYNTA_SATISFY_POOL_CAPACITY];
 size_t __cynta_satisfy_pool_index = 0;
 
 static cynta_parser_error_t satisfy_apply(cynta_parser_t *base, cynta_stream_t *stream, void *out)
 {
-    cynta_satisfy_parser_t *parser = (cynta_satisfy_parser_t *)base;
-    if (parser == NULL ||
+    cynta_satisfy_t *self = (cynta_satisfy_t *)base;
+    if (self == NULL ||
         stream == NULL ||
         out == NULL)
     {
@@ -28,7 +29,7 @@ static cynta_parser_error_t satisfy_apply(cynta_parser_t *base, cynta_stream_t *
         return CYNTA_PARSER_ERROR_INTERNAL;
     }
 
-    if (!parser->condition(parser, incoming))
+    if (!self->condition(self, incoming))
     {
         return CYNTA_PARSER_ERROR_UNEXPECTED_VALUE;
     }
@@ -39,16 +40,18 @@ static cynta_parser_error_t satisfy_apply(cynta_parser_t *base, cynta_stream_t *
     return CYNTA_PARSER_SUCCESS;
 }
 
-cynta_parser_error_t cynta_satisfy_init(cynta_satisfy_parser_t *parser, bool (*cond)(cynta_satisfy_parser_t *, uint8_t))
+cynta_parser_error_t cynta_satisfy_init(cynta_satisfy_t *self, bool (*cond)(cynta_satisfy_t *, uint8_t))
 {
-    if (parser == NULL ||
+    if (self == NULL ||
         cond == NULL)
     {
         return CYNTA_PARSER_ERROR_NULL_POINTER;
     }
 
-    parser->base.apply = satisfy_apply;
-    parser->condition = cond;
+    self->base.apply = satisfy_apply;
+    self->condition = cond;
 
     return CYNTA_PARSER_SUCCESS;
 }
+
+#endif

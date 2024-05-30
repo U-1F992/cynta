@@ -1,15 +1,16 @@
-#include <cynta/parser/repeat.h>
-#include <cynta/uint8_array.h>
+#include <cynta.h>
+
+#if 0 < CYNTA_REPEAT_POOL_CAPACITY
 
 #include <string.h>
 
-cynta_repeat_parser_t __cynta_repeat_pool[CYNTA_REPEAT_POOL_CAPACITY];
+cynta_repeat_t __cynta_repeat_pool[CYNTA_REPEAT_POOL_CAPACITY];
 size_t __cynta_repeat_pool_index = 0;
 
 static cynta_parser_error_t repeat_apply(cynta_parser_t *base, cynta_stream_t *stream, void *out)
 {
-    cynta_repeat_parser_t *parser = (cynta_repeat_parser_t *)base;
-    if (parser == NULL ||
+    cynta_repeat_t *self = (cynta_repeat_t *)base;
+    if (self == NULL ||
         stream == NULL ||
         out == NULL)
     {
@@ -17,40 +18,41 @@ static cynta_parser_error_t repeat_apply(cynta_parser_t *base, cynta_stream_t *s
     }
 
     size_t total_size = 0;
+    cynta_parser_error_t err;
 
-    for (size_t i = 0; i < parser->count; i++)
+    for (size_t i = 0; i < self->count; i++)
     {
-        cynta_uint8_array_t part_out;
-        cynta_parser_error_t err = cynta_parser_apply(parser->parser, stream, (void *)&part_out);
+        err = cynta_parser_apply(self->parser, stream, (void *)&(self->incoming_buffer));
         if (err != CYNTA_PARSER_SUCCESS)
         {
             return err;
         }
-
-        if (total_size + part_out.size >= CYNTA_UINT8_ARRAY_CAPACITY)
+        if (total_size + self->incoming_buffer.size >= CYNTA_UINT8_ARRAY_CAPACITY)
         {
             return CYNTA_PARSER_ERROR_OUT_OF_CAPACITY;
         }
-
-        memcpy((*(cynta_uint8_array_t *)out).data + total_size, part_out.data, part_out.size);
-        total_size += part_out.size;
+        memcpy((*(cynta_uint8_array_t *)out).data + total_size, self->incoming_buffer.data, self->incoming_buffer.size);
+        total_size += self->incoming_buffer.size;
     }
+    
     (*(cynta_uint8_array_t *)out).size = total_size;
 
     return CYNTA_PARSER_SUCCESS;
 }
 
-cynta_parser_error_t cynta_repeat_init(cynta_repeat_parser_t *parser, cynta_parser_t *p, size_t n)
+cynta_parser_error_t cynta_repeat_init(cynta_repeat_t *self, cynta_parser_t *p, size_t n)
 {
-    if (parser == NULL ||
+    if (self == NULL ||
         p == NULL)
     {
         return CYNTA_PARSER_ERROR_NULL_POINTER;
     }
 
-    parser->base.apply = repeat_apply;
-    parser->parser = p;
-    parser->count = n;
+    self->base.apply = repeat_apply;
+    self->parser = p;
+    self->count = n;
 
     return CYNTA_PARSER_SUCCESS;
 }
+
+#endif

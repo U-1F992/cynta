@@ -1,6 +1,5 @@
 #include <cynta.h>
 
-#include <stdbool.h>
 #include <stdlib.h>
 
 #define PUSH(stack, value) ((stack)[(stack##_size)++] = (value))
