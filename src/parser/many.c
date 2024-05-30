@@ -1,11 +1,11 @@
 #include <cynta.h>
 
-#if 0 < CYNTA_MANY_POOL_CAPACITY
+#if 0 < CYNTA_GLOBAL_POOL_MANY_CAPACITY
 
 #include <string.h>
 
-cynta_many_t __cynta_many_pool[CYNTA_MANY_POOL_CAPACITY];
-size_t __cynta_many_pool_index = 0;
+cynta_many_t __cynta_global_pool_many[CYNTA_GLOBAL_POOL_MANY_CAPACITY];
+size_t __cynta_global_pool_many_index = 0;
 
 static cynta_parser_error_t many_apply(cynta_parser_t *base, cynta_stream_t *stream, void *out)
 {

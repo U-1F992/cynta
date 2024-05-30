@@ -1,11 +1,11 @@
 #include <cynta.h>
 
-#if 0 < CYNTA_REPEAT_POOL_CAPACITY
+#if 0 < CYNTA_GLOBAL_POOL_REPEAT_CAPACITY
 
 #include <string.h>
 
-cynta_repeat_t __cynta_repeat_pool[CYNTA_REPEAT_POOL_CAPACITY];
-size_t __cynta_repeat_pool_index = 0;
+cynta_repeat_t __cynta_global_pool_repeat[CYNTA_GLOBAL_POOL_REPEAT_CAPACITY];
+size_t __cynta_global_pool_repeat_index = 0;
 
 static cynta_parser_error_t repeat_apply(cynta_parser_t *base, cynta_stream_t *stream, void *out)
 {
@@ -34,7 +34,7 @@ static cynta_parser_error_t repeat_apply(cynta_parser_t *base, cynta_stream_t *s
         memcpy((*(cynta_uint8_array_t *)out).data + total_size, self->incoming_buffer.data, self->incoming_buffer.size);
         total_size += self->incoming_buffer.size;
     }
-    
+
     (*(cynta_uint8_array_t *)out).size = total_size;
 
     return CYNTA_PARSER_SUCCESS;

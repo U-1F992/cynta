@@ -1,11 +1,11 @@
 #include <cynta.h>
 
-#if 0 < CYNTA_SEQUENCE_POOL_CAPACITY
+#if 0 < CYNTA_GLOBAL_POOL_SEQUENCE_CAPACITY
 
 #include <string.h>
 
-cynta_sequence_t __cynta_sequence_pool[CYNTA_SEQUENCE_POOL_CAPACITY];
-size_t __cynta_sequence_pool_index = 0;
+cynta_sequence_t __cynta_global_pool_sequence[CYNTA_GLOBAL_POOL_SEQUENCE_CAPACITY];
+size_t __cynta_global_pool_sequence_index = 0;
 
 static cynta_parser_error_t sequence_apply(cynta_parser_t *base, cynta_stream_t *stream, void *out)
 {

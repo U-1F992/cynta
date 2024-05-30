@@ -12,39 +12,39 @@ extern "C"
 #include <stdint.h>
 
 #ifndef CYNTA_STREAM_BACKTRACK_HISTORY_CAPACITY
-#define CYNTA_STREAM_BACKTRACK_HISTORY_CAPACITY ((size_t)256)
+#define CYNTA_STREAM_BACKTRACK_HISTORY_CAPACITY 256
 #endif
 
 #ifndef CYNTA_STREAM_BACKTRACK_CHECKPOINTS_CAPACITY
-#define CYNTA_STREAM_BACKTRACK_CHECKPOINTS_CAPACITY ((size_t)256)
+#define CYNTA_STREAM_BACKTRACK_CHECKPOINTS_CAPACITY 256
 #endif
 
 #ifndef CYNTA_UINT8_ARRAY_CAPACITY
-#define CYNTA_UINT8_ARRAY_CAPACITY ((size_t)256)
+#define CYNTA_UINT8_ARRAY_CAPACITY 256
 #endif
 
-#ifndef CYNTA_SATISFY_POOL_CAPACITY
-#define CYNTA_SATISFY_POOL_CAPACITY 256
+#ifndef CYNTA_GLOBAL_POOL_SATISFY_CAPACITY
+#define CYNTA_GLOBAL_POOL_SATISFY_CAPACITY 256
 #endif
 
-#ifndef CYNTA_ANY_POOL_CAPACITY
-#define CYNTA_ANY_POOL_CAPACITY 256
+#ifndef CYNTA_GLOBAL_POOL_ANY_CAPACITY
+#define CYNTA_GLOBAL_POOL_ANY_CAPACITY 256
 #endif
 
-#ifndef CYNTA_VALUE_POOL_CAPACITY
-#define CYNTA_VALUE_POOL_CAPACITY 256
+#ifndef CYNTA_GLOBAL_POOL_VALUE_CAPACITY
+#define CYNTA_GLOBAL_POOL_VALUE_CAPACITY 256
 #endif
 
-#ifndef CYNTA_SEQUENCE_POOL_CAPACITY
-#define CYNTA_SEQUENCE_POOL_CAPACITY 256
+#ifndef CYNTA_GLOBAL_POOL_SEQUENCE_CAPACITY
+#define CYNTA_GLOBAL_POOL_SEQUENCE_CAPACITY 256
 #endif
 
-#ifndef CYNTA_REPEAT_POOL_CAPACITY
-#define CYNTA_REPEAT_POOL_CAPACITY 256
+#ifndef CYNTA_GLOBAL_POOL_REPEAT_CAPACITY
+#define CYNTA_GLOBAL_POOL_REPEAT_CAPACITY 256
 #endif
 
-#ifndef CYNTA_MANY_POOL_CAPACITY
-#define CYNTA_MANY_POOL_CAPACITY 256
+#ifndef CYNTA_GLOBAL_POOL_MANY_CAPACITY
+#define CYNTA_GLOBAL_POOL_MANY_CAPACITY 256
 #endif
 
     /****************************************************************************************************/
@@ -132,7 +132,7 @@ extern "C"
     /* parser/satisfy                                                                                   */
     /****************************************************************************************************/
 
-#if 0 < CYNTA_SATISFY_POOL_CAPACITY + CYNTA_ANY_POOL_CAPACITY + CYNTA_VALUE_POOL_CAPACITY
+#if 0 < CYNTA_GLOBAL_POOL_SATISFY_CAPACITY + CYNTA_GLOBAL_POOL_ANY_CAPACITY + CYNTA_GLOBAL_POOL_VALUE_CAPACITY
 
     typedef struct cynta_satisfy_t
     {
@@ -143,14 +143,14 @@ extern "C"
 
     cynta_parser_error_t cynta_satisfy_init(cynta_satisfy_t *, bool (*)(cynta_satisfy_t *, uint8_t));
 
-    extern cynta_satisfy_t __cynta_satisfy_pool[CYNTA_SATISFY_POOL_CAPACITY];
-    extern size_t __cynta_satisfy_pool_index;
+    extern cynta_satisfy_t __cynta_global_pool_satisfy[CYNTA_GLOBAL_POOL_SATISFY_CAPACITY];
+    extern size_t __cynta_global_pool_satisfy_index;
 
-#define cynta_satisfy(cond) (__cynta_satisfy_pool_index >= CYNTA_SATISFY_POOL_CAPACITY                                               \
-                                 ? NULL                                                                                              \
-                             : cynta_satisfy_init(&__cynta_satisfy_pool[__cynta_satisfy_pool_index], (cond)) != CYNTA_PARSER_SUCCESS \
-                                 ? NULL                                                                                              \
-                                 : (cynta_parser_t *)&__cynta_satisfy_pool[__cynta_satisfy_pool_index++])
+#define cynta_satisfy(cond) (__cynta_global_pool_satisfy_index >= CYNTA_GLOBAL_POOL_SATISFY_CAPACITY                                               \
+                                 ? NULL                                                                                                            \
+                             : cynta_satisfy_init(&__cynta_global_pool_satisfy[__cynta_global_pool_satisfy_index], (cond)) != CYNTA_PARSER_SUCCESS \
+                                 ? NULL                                                                                                            \
+                                 : (cynta_parser_t *)&__cynta_global_pool_satisfy[__cynta_global_pool_satisfy_index++])
 
 #endif
 
@@ -158,7 +158,7 @@ extern "C"
     /* parser/any                                                                                       */
     /****************************************************************************************************/
 
-#if 0 < CYNTA_ANY_POOL_CAPACITY
+#if 0 < CYNTA_GLOBAL_POOL_ANY_CAPACITY
 
     typedef struct cynta_any_t
     {
@@ -167,14 +167,14 @@ extern "C"
 
     cynta_parser_error_t cynta_any_init(cynta_any_t *);
 
-    extern cynta_any_t __cynta_any_pool[CYNTA_ANY_POOL_CAPACITY];
-    extern size_t __cynta_any_pool_index;
+    extern cynta_any_t __cynta_global_pool_any[CYNTA_GLOBAL_POOL_ANY_CAPACITY];
+    extern size_t __cynta_global_pool_any_index;
 
-#define cynta_any() (__cynta_any_pool_index >= CYNTA_ANY_POOL_CAPACITY                                   \
-                         ? NULL                                                                          \
-                     : cynta_any_init(&__cynta_any_pool[__cynta_any_pool_index]) != CYNTA_PARSER_SUCCESS \
-                         ? NULL                                                                          \
-                         : (cynta_parser_t *)&__cynta_any_pool[__cynta_any_pool_index++])
+#define cynta_any() (__cynta_global_pool_any_index >= CYNTA_GLOBAL_POOL_ANY_CAPACITY                                   \
+                         ? NULL                                                                                        \
+                     : cynta_any_init(&__cynta_global_pool_any[__cynta_global_pool_any_index]) != CYNTA_PARSER_SUCCESS \
+                         ? NULL                                                                                        \
+                         : (cynta_parser_t *)&__cynta_global_pool_any[__cynta_global_pool_any_index++])
 
 #endif
 
@@ -182,7 +182,7 @@ extern "C"
     /* parser/value                                                                                     */
     /****************************************************************************************************/
 
-#if 0 < CYNTA_VALUE_POOL_CAPACITY
+#if 0 < CYNTA_GLOBAL_POOL_VALUE_CAPACITY
 
     typedef struct cynta_value_t
     {
@@ -193,14 +193,14 @@ extern "C"
 
     cynta_parser_error_t cynta_value_init(cynta_value_t *, uint8_t);
 
-    extern cynta_value_t __cynta_value_pool[CYNTA_VALUE_POOL_CAPACITY];
-    extern size_t __cynta_value_pool_index;
+    extern cynta_value_t __cynta_global_pool_value[CYNTA_GLOBAL_POOL_VALUE_CAPACITY];
+    extern size_t __cynta_global_pool_value_index;
 
-#define cynta_value(value) (__cynta_value_pool_index >= CYNTA_VALUE_POOL_CAPACITY                                              \
-                                ? NULL                                                                                         \
-                            : cynta_value_init(&__cynta_value_pool[__cynta_value_pool_index], (value)) != CYNTA_PARSER_SUCCESS \
-                                ? NULL                                                                                         \
-                                : (cynta_parser_t *)&__cynta_value_pool[__cynta_value_pool_index++])
+#define cynta_value(value) (__cynta_global_pool_value_index >= CYNTA_GLOBAL_POOL_VALUE_CAPACITY                                              \
+                                ? NULL                                                                                                       \
+                            : cynta_value_init(&__cynta_global_pool_value[__cynta_global_pool_value_index], (value)) != CYNTA_PARSER_SUCCESS \
+                                ? NULL                                                                                                       \
+                                : (cynta_parser_t *)&__cynta_global_pool_value[__cynta_global_pool_value_index++])
 
 #endif
 
@@ -208,7 +208,7 @@ extern "C"
     /* parser/sequence                                                                                  */
     /****************************************************************************************************/
 
-#if 0 < CYNTA_SEQUENCE_POOL_CAPACITY
+#if 0 < CYNTA_GLOBAL_POOL_SEQUENCE_CAPACITY
 
     typedef struct cynta_sequence_t
     {
@@ -220,14 +220,14 @@ extern "C"
 
     cynta_parser_error_t cynta_sequence_init(cynta_sequence_t *, cynta_parser_t *, cynta_parser_t *);
 
-    extern cynta_sequence_t __cynta_sequence_pool[CYNTA_SEQUENCE_POOL_CAPACITY];
-    extern size_t __cynta_sequence_pool_index;
+    extern cynta_sequence_t __cynta_global_pool_sequence[CYNTA_GLOBAL_POOL_SEQUENCE_CAPACITY];
+    extern size_t __cynta_global_pool_sequence_index;
 
-#define cynta_sequence(p0, p1) (__cynta_sequence_pool_index >= CYNTA_SEQUENCE_POOL_CAPACITY                                                    \
-                                    ? NULL                                                                                                     \
-                                : cynta_sequence_init(&__cynta_sequence_pool[__cynta_sequence_pool_index], (p0), (p1)) != CYNTA_PARSER_SUCCESS \
-                                    ? NULL                                                                                                     \
-                                    : (cynta_parser_t *)&__cynta_sequence_pool[__cynta_sequence_pool_index++])
+#define cynta_sequence(p0, p1) (__cynta_global_pool_sequence_index >= CYNTA_GLOBAL_POOL_SEQUENCE_CAPACITY                                                    \
+                                    ? NULL                                                                                                                   \
+                                : cynta_sequence_init(&__cynta_global_pool_sequence[__cynta_global_pool_sequence_index], (p0), (p1)) != CYNTA_PARSER_SUCCESS \
+                                    ? NULL                                                                                                                   \
+                                    : (cynta_parser_t *)&__cynta_global_pool_sequence[__cynta_global_pool_sequence_index++])
 
 #endif
 
@@ -235,7 +235,7 @@ extern "C"
     /* parser/repeat                                                                                    */
     /****************************************************************************************************/
 
-#if 0 < CYNTA_REPEAT_POOL_CAPACITY
+#if 0 < CYNTA_GLOBAL_POOL_REPEAT_CAPACITY
 
     typedef struct cynta_repeat_t
     {
@@ -248,14 +248,14 @@ extern "C"
 
     cynta_parser_error_t cynta_repeat_init(cynta_repeat_t *, cynta_parser_t *, size_t);
 
-    extern cynta_repeat_t __cynta_repeat_pool[CYNTA_REPEAT_POOL_CAPACITY];
-    extern size_t __cynta_repeat_pool_index;
+    extern cynta_repeat_t __cynta_global_pool_repeat[CYNTA_GLOBAL_POOL_REPEAT_CAPACITY];
+    extern size_t __cynta_global_pool_repeat_index;
 
-#define cynta_repeat(p, n) (__cynta_repeat_pool_index >= CYNTA_REPEAT_POOL_CAPACITY                                                \
-                                ? NULL                                                                                             \
-                            : cynta_repeat_init(&__cynta_repeat_pool[__cynta_repeat_pool_index], (p), (n)) != CYNTA_PARSER_SUCCESS \
-                                ? NULL                                                                                             \
-                                : (cynta_parser_t *)&__cynta_repeat_pool[__cynta_repeat_pool_index++])
+#define cynta_repeat(p, n) (__cynta_global_pool_repeat_index >= CYNTA_GLOBAL_POOL_REPEAT_CAPACITY                                                \
+                                ? NULL                                                                                                           \
+                            : cynta_repeat_init(&__cynta_global_pool_repeat[__cynta_global_pool_repeat_index], (p), (n)) != CYNTA_PARSER_SUCCESS \
+                                ? NULL                                                                                                           \
+                                : (cynta_parser_t *)&__cynta_global_pool_repeat[__cynta_global_pool_repeat_index++])
 
 #endif
 
@@ -263,7 +263,7 @@ extern "C"
     /* parser/many                                                                                      */
     /****************************************************************************************************/
 
-#if 0 < CYNTA_MANY_POOL_CAPACITY
+#if 0 < CYNTA_GLOBAL_POOL_MANY_CAPACITY
 
     typedef struct cynta_many_t
     {
@@ -275,14 +275,14 @@ extern "C"
 
     cynta_parser_error_t cynta_many_init(cynta_many_t *, cynta_parser_t *);
 
-    extern cynta_many_t __cynta_many_pool[CYNTA_MANY_POOL_CAPACITY];
-    extern size_t __cynta_many_pool_index;
+    extern cynta_many_t __cynta_global_pool_many[CYNTA_GLOBAL_POOL_MANY_CAPACITY];
+    extern size_t __cynta_global_pool_many_index;
 
-#define cynta_many(p) (__cynta_many_pool_index >= CYNTA_MANY_POOL_CAPACITY                                         \
-                           ? NULL                                                                                  \
-                       : cynta_many_init(&__cynta_many_pool[__cynta_many_pool_index], (p)) != CYNTA_PARSER_SUCCESS \
-                           ? NULL                                                                                  \
-                           : (cynta_parser_t *)&__cynta_many_pool[__cynta_many_pool_index++])
+#define cynta_many(p) (__cynta_global_pool_many_index >= CYNTA_GLOBAL_POOL_MANY_CAPACITY                                         \
+                           ? NULL                                                                                                \
+                       : cynta_many_init(&__cynta_global_pool_many[__cynta_global_pool_many_index], (p)) != CYNTA_PARSER_SUCCESS \
+                           ? NULL                                                                                                \
+                           : (cynta_parser_t *)&__cynta_global_pool_many[__cynta_global_pool_many_index++])
 
 #endif
 

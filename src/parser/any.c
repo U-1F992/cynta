@@ -1,9 +1,9 @@
 #include <cynta.h>
 
-#if 0 < CYNTA_ANY_POOL_CAPACITY
+#if 0 < CYNTA_GLOBAL_POOL_ANY_CAPACITY
 
-cynta_any_t __cynta_any_pool[CYNTA_ANY_POOL_CAPACITY];
-size_t __cynta_any_pool_index = 0;
+cynta_any_t __cynta_global_pool_any[CYNTA_GLOBAL_POOL_ANY_CAPACITY];
+size_t __cynta_global_pool_any_index = 0;
 
 static bool any_condition(cynta_satisfy_t *base, uint8_t incoming)
 {

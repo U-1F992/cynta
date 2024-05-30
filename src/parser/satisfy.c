@@ -1,9 +1,9 @@
 #include <cynta.h>
 
-#if 0 < CYNTA_SATISFY_POOL_CAPACITY + CYNTA_ANY_POOL_CAPACITY + CYNTA_VALUE_POOL_CAPACITY
+#if 0 < CYNTA_GLOBAL_POOL_SATISFY_CAPACITY + CYNTA_GLOBAL_POOL_ANY_CAPACITY + CYNTA_GLOBAL_POOL_VALUE_CAPACITY
 
-cynta_satisfy_t __cynta_satisfy_pool[CYNTA_SATISFY_POOL_CAPACITY];
-size_t __cynta_satisfy_pool_index = 0;
+cynta_satisfy_t __cynta_global_pool_satisfy[CYNTA_GLOBAL_POOL_SATISFY_CAPACITY];
+size_t __cynta_global_pool_satisfy_index = 0;
 
 static cynta_parser_error_t satisfy_apply(cynta_parser_t *base, cynta_stream_t *stream, void *out)
 {
