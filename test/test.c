@@ -89,49 +89,43 @@ void test_parser_uint8(cynta_parser_t *parser,
     array_stream_t stream;
     assert(CYNTA_STREAM_SUCCESS == array_stream_init(&stream, test_case, test_case_size));
 
-    void *actual_out;
-    size_t actual_out_size;
-
-    cynta_parser_error_t actual = cynta_parser_apply(parser, (cynta_stream_t *)&stream, &actual_out, &actual_out_size);
+    cynta_uint8_array_t actual_out;
+    cynta_parser_error_t actual = cynta_parser_apply(parser, (cynta_stream_t *)&stream, (void *)&actual_out);
     if (expected != actual)
     {
         fprintf(stderr,
                 "%sexpected: %s, actual: %s%s\n",
                 TEST_TEXT_RED, CYNTA_PARSER_ERROR(expected), CYNTA_PARSER_ERROR(actual), TEST_TEXT_RESET);
         test_failure++;
-        goto cleanup_parser_stream;
+        goto cleanup;
     }
     if (actual != CYNTA_PARSER_SUCCESS)
     {
-        goto cleanup_parser_stream;
+        goto cleanup;
     }
 
-    if (expected_out_size != actual_out_size)
+    if (expected_out_size != actual_out.size)
     {
         fprintf(stderr,
                 "%sexpected_out_size: %d, actual_out_size: %d%s\n",
-                TEST_TEXT_RED, expected_out_size, actual_out_size, TEST_TEXT_RESET);
+                TEST_TEXT_RED, expected_out_size, actual_out.size, TEST_TEXT_RESET);
         test_failure++;
-        goto cleanup_out;
+        goto cleanup;
     }
 
-    uint8_t *actual_out_arr = (uint8_t *)actual_out;
-    for (size_t i = 0; i < actual_out_size; i++)
+    for (size_t i = 0; i < actual_out.size; i++)
     {
-        if (expected_out[i] != actual_out_arr[i])
+        if (expected_out[i] != actual_out.data[i])
         {
             fprintf(stderr,
                     "%sexpected_out[%d]: %d, actual_out[%d]: %d%s\n",
-                    TEST_TEXT_RED, i, expected_out[i], i, actual_out_arr[i], TEST_TEXT_RESET);
+                    TEST_TEXT_RED, i, expected_out[i], i, actual_out.data[i], TEST_TEXT_RESET);
             test_failure++;
-            goto cleanup_out;
+            goto cleanup;
         }
     }
 
-cleanup_out:
-    free(actual_out);
-
-cleanup_parser_stream:
+cleanup:
     cynta_parser_delete(parser);
 
     if (!test_failure)

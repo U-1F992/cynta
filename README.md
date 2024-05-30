@@ -1,3 +1,7 @@
+The primary feature of this library is the elimination of dynamic memory allocation (e.g., `malloc`, `realloc`, `free`). It aims to enhance performance, prevent memory leaks, and increase the predictability of memory usage, particularly in resource-constrained environments such as microcontrollers.
+
+We may employ macros to adjust memory usage settings to sizes that are optimal for the application. This approach requires careful consideration of the number of parsers in use simultaneously and the potential inputs and outputs for each parser. In microcontroller applications, although parsers may handle dynamic data, the parsers themselves are typically not dynamically generated during runtime but are instead statically integrated during application compilation, aligning well with this design.
+
 We introduce a generics-like notation for explanation. `parser_t<T>` is assumed to internally cast the `void *out` argument of `parser_apply` to `T *out` and set the value. The caller declares a variable of type `T` and supplies its reference to `parser_apply`.
 
 Furthermore, we prepare a helper structure. By `typedef struct uint8_array_t { uint8_t data[UINT8_ARRAY_CAPACITY]; size_t size; } uint8_array_t;`, an array and its size are shared through a single reference, `void *out`.

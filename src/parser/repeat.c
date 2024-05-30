@@ -2,46 +2,36 @@
 
 #include <memory.h>
 
-static cynta_parser_error_t repeat_apply(cynta_parser_t *base, cynta_stream_t *stream, void **out, size_t *out_size)
+static cynta_parser_error_t repeat_apply(cynta_parser_t *base, cynta_stream_t *stream, void *out)
 {
     cynta_repeat_parser_t *parser = (cynta_repeat_parser_t *)base;
     if (parser == NULL ||
         stream == NULL ||
-        out == NULL ||
-        out_size == NULL)
+        out == NULL)
     {
         return CYNTA_PARSER_ERROR_NULL_POINTER;
     }
 
     size_t total_size = 0;
-    uint8_t *buffer = NULL;
 
     for (size_t i = 0; i < parser->count; i++)
     {
-        void *part_out;
-        size_t part_out_size;
-        cynta_parser_error_t err = cynta_parser_apply(parser->parser, stream, &part_out, &part_out_size);
+        cynta_uint8_array_t part_out;
+        cynta_parser_error_t err = cynta_parser_apply(parser->parser, stream, (void *)&part_out);
         if (err != CYNTA_PARSER_SUCCESS)
         {
-            // Cleanup any previously allocated memory
-            free(buffer);
             return err;
         }
 
-        buffer = realloc(buffer, total_size + part_out_size);
-        if (buffer == NULL)
+        if (total_size + part_out.size >= CYNTA_UINT8_ARRAY_CAPACITY)
         {
-            free(part_out);
-            return CYNTA_PARSER_ERROR_MEMORY_ALLOCATION;
+            return CYNTA_PARSER_ERROR_OUT_OF_CAPACITY;
         }
 
-        memcpy(buffer + total_size, part_out, part_out_size);
-        total_size += part_out_size;
-        free(part_out);
+        memcpy((*(cynta_uint8_array_t *)out).data + total_size, part_out.data, part_out.size);
+        total_size += part_out.size;
     }
-
-    *out = buffer;
-    *out_size = total_size;
+    (*(cynta_uint8_array_t *)out).size = total_size;
 
     return CYNTA_PARSER_SUCCESS;
 }

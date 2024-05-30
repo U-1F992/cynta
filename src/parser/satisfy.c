@@ -1,12 +1,11 @@
 #include <cynta.h>
 
-static cynta_parser_error_t satisfy_apply(cynta_parser_t *base, cynta_stream_t *stream, void **out, size_t *out_size)
+static cynta_parser_error_t satisfy_apply(cynta_parser_t *base, cynta_stream_t *stream, void *out)
 {
     cynta_satisfy_parser_t *parser = (cynta_satisfy_parser_t *)base;
     if (parser == NULL ||
         stream == NULL ||
-        out == NULL ||
-        out_size == NULL)
+        out == NULL)
     {
         return CYNTA_PARSER_ERROR_NULL_POINTER;
     }
@@ -29,20 +28,11 @@ static cynta_parser_error_t satisfy_apply(cynta_parser_t *base, cynta_stream_t *
     {
         return CYNTA_PARSER_ERROR_UNEXPECTED_VALUE;
     }
-    else
-    {
-        uint8_t *temp_out = (uint8_t *)malloc(sizeof(uint8_t));
-        if (temp_out == NULL)
-        {
-            return CYNTA_PARSER_ERROR_MEMORY_ALLOCATION;
-        }
 
-        *temp_out = incoming;
-        *out = temp_out;
-        *out_size = 1;
+    ((cynta_uint8_array_t *)out)->data[0] = incoming;
+    ((cynta_uint8_array_t *)out)->size = 1;
 
-        return CYNTA_PARSER_SUCCESS;
-    }
+    return CYNTA_PARSER_SUCCESS;
 }
 
 static void satisfy_delete(cynta_parser_t *base)
