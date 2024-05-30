@@ -1,4 +1,7 @@
-#include <cynta.h>
+#include <cynta/parser/any.h>
+
+cynta_any_parser_t __cynta_any_pool[CYNTA_ANY_POOL_CAPACITY];
+size_t __cynta_any_pool_index = 0;
 
 static bool any_condition(cynta_satisfy_parser_t *base, uint8_t incoming)
 {
@@ -13,22 +16,4 @@ cynta_parser_error_t cynta_any_init(cynta_any_parser_t *parser)
     }
 
     return cynta_satisfy_init(&parser->base, any_condition);
-}
-
-cynta_parser_t *cynta_any(void)
-{
-    cynta_any_parser_t *parser = (cynta_any_parser_t *)malloc(sizeof(cynta_any_parser_t));
-    if (parser == NULL)
-    {
-        return NULL;
-    }
-
-    cynta_parser_error_t err = cynta_any_init(parser);
-    if (err != CYNTA_PARSER_SUCCESS)
-    {
-        free(parser);
-        return NULL;
-    }
-
-    return (cynta_parser_t *)parser;
 }

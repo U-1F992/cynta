@@ -126,7 +126,6 @@ void test_parser_uint8(cynta_parser_t *parser,
     }
 
 cleanup:
-    cynta_parser_delete(parser);
 
     if (!test_failure)
     {

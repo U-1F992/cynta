@@ -1,6 +1,10 @@
-#include <cynta.h>
+#include <cynta/parser/sequence.h>
+#include <cynta/uint8_array.h>
 
 #include <string.h>
+
+cynta_sequence_parser_t __cynta_sequence_pool[CYNTA_SEQUENCE_POOL_CAPACITY];
+size_t __cynta_sequence_pool_index = 0;
 
 static cynta_parser_error_t sequence_apply(cynta_parser_t *base, cynta_stream_t *stream, void *out)
 {
@@ -33,16 +37,6 @@ static cynta_parser_error_t sequence_apply(cynta_parser_t *base, cynta_stream_t 
     return CYNTA_PARSER_SUCCESS;
 }
 
-static void sequence_delete(cynta_parser_t *base)
-{
-    cynta_sequence_parser_t *parser = (cynta_sequence_parser_t *)base;
-    if (parser != NULL)
-    {
-        cynta_parser_delete(parser->parsers[0]);
-        cynta_parser_delete(parser->parsers[1]);
-    }
-}
-
 cynta_parser_error_t cynta_sequence_init(cynta_sequence_parser_t *parser, cynta_parser_t *p0, cynta_parser_t *p1)
 {
     if (parser == NULL ||
@@ -53,27 +47,8 @@ cynta_parser_error_t cynta_sequence_init(cynta_sequence_parser_t *parser, cynta_
     }
 
     parser->base.apply = sequence_apply;
-    parser->base.delete = sequence_delete;
     parser->parsers[0] = p0;
     parser->parsers[1] = p1;
 
     return CYNTA_PARSER_SUCCESS;
-}
-
-cynta_parser_t *cynta_sequence(cynta_parser_t *p0, cynta_parser_t *p1)
-{
-    cynta_sequence_parser_t *parser = (cynta_sequence_parser_t *)malloc(sizeof(cynta_sequence_parser_t));
-    if (parser == NULL)
-    {
-        return NULL;
-    }
-
-    cynta_parser_error_t err = cynta_sequence_init(parser, p0, p1);
-    if (err != CYNTA_PARSER_SUCCESS)
-    {
-        free(parser);
-        return NULL;
-    }
-
-    return (cynta_parser_t *)parser;
 }

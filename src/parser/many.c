@@ -1,6 +1,10 @@
-#include <cynta.h>
+#include <cynta/parser/many.h>
+#include <cynta/uint8_array.h>
 
-#include <memory.h>
+#include <string.h>
+
+cynta_many_parser_t __cynta_many_pool[CYNTA_MANY_POOL_CAPACITY];
+size_t __cynta_many_pool_index = 0;
 
 static cynta_parser_error_t many_apply(cynta_parser_t *base, cynta_stream_t *stream, void *out)
 {
@@ -14,7 +18,7 @@ static cynta_parser_error_t many_apply(cynta_parser_t *base, cynta_stream_t *str
 
     size_t total_size = 0;
 
-    while (true)
+    while (1)
     {
         cynta_uint8_array_t part_out;
 
@@ -53,15 +57,6 @@ static cynta_parser_error_t many_apply(cynta_parser_t *base, cynta_stream_t *str
     return CYNTA_PARSER_SUCCESS;
 }
 
-static void many_delete(cynta_parser_t *base)
-{
-    cynta_many_parser_t *parser = (cynta_many_parser_t *)base;
-    if (parser != NULL)
-    {
-        cynta_parser_delete(parser->parser);
-    }
-}
-
 cynta_parser_error_t cynta_many_init(cynta_many_parser_t *parser, cynta_parser_t *p)
 {
     if (parser == NULL ||
@@ -71,26 +66,7 @@ cynta_parser_error_t cynta_many_init(cynta_many_parser_t *parser, cynta_parser_t
     }
 
     parser->base.apply = many_apply;
-    parser->base.delete = many_delete;
     parser->parser = p;
 
     return CYNTA_PARSER_SUCCESS;
-}
-
-cynta_parser_t *cynta_many(cynta_parser_t *p)
-{
-    cynta_many_parser_t *parser = (cynta_many_parser_t *)malloc(sizeof(cynta_many_parser_t));
-    if (parser == NULL)
-    {
-        return NULL;
-    }
-
-    cynta_parser_error_t err = cynta_many_init(parser, p);
-    if (err != CYNTA_PARSER_SUCCESS)
-    {
-        free(parser);
-        return NULL;
-    }
-
-    return (cynta_parser_t *)parser;
 }

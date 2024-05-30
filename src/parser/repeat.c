@@ -1,6 +1,10 @@
-#include <cynta.h>
+#include <cynta/parser/repeat.h>
+#include <cynta/uint8_array.h>
 
-#include <memory.h>
+#include <string.h>
+
+cynta_repeat_parser_t __cynta_repeat_pool[CYNTA_REPEAT_POOL_CAPACITY];
+size_t __cynta_repeat_pool_index = 0;
 
 static cynta_parser_error_t repeat_apply(cynta_parser_t *base, cynta_stream_t *stream, void *out)
 {
@@ -36,15 +40,6 @@ static cynta_parser_error_t repeat_apply(cynta_parser_t *base, cynta_stream_t *s
     return CYNTA_PARSER_SUCCESS;
 }
 
-static void repeat_delete(cynta_parser_t *base)
-{
-    cynta_repeat_parser_t *parser = (cynta_repeat_parser_t *)base;
-    if (parser != NULL)
-    {
-        cynta_parser_delete(parser->parser);
-    }
-}
-
 cynta_parser_error_t cynta_repeat_init(cynta_repeat_parser_t *parser, cynta_parser_t *p, size_t n)
 {
     if (parser == NULL ||
@@ -54,27 +49,8 @@ cynta_parser_error_t cynta_repeat_init(cynta_repeat_parser_t *parser, cynta_pars
     }
 
     parser->base.apply = repeat_apply;
-    parser->base.delete = repeat_delete;
     parser->parser = p;
     parser->count = n;
 
     return CYNTA_PARSER_SUCCESS;
-}
-
-cynta_parser_t *cynta_repeat(cynta_parser_t *p, size_t n)
-{
-    cynta_repeat_parser_t *parser = (cynta_repeat_parser_t *)malloc(sizeof(cynta_repeat_parser_t));
-    if (parser == NULL)
-    {
-        return NULL;
-    }
-
-    cynta_parser_error_t err = cynta_repeat_init(parser, p, n);
-    if (err != CYNTA_PARSER_SUCCESS)
-    {
-        free(parser);
-        return NULL;
-    }
-
-    return (cynta_parser_t *)parser;
 }
