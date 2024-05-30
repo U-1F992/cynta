@@ -1,6 +1,6 @@
 # Cynta（心太）
 
-A parser combinator library.
+Parser combinator library written in C language.
 
 This library has achieved the elimination of dynamic memory allocation (e.g., `malloc`, `realloc`, `free`). It aims to enhance performance, prevent memory leaks, and increase the predictability of memory usage, particularly in resource-constrained environments such as microcontrollers.
 
