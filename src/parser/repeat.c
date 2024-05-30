@@ -27,7 +27,7 @@ static cynta_parser_error_t repeat_apply(cynta_parser_t *base, cynta_stream_t *s
         {
             return err;
         }
-        if (total_size + self->incoming_buffer.size >= CYNTA_UINT8_ARRAY_CAPACITY)
+        if (total_size + self->incoming_buffer.size > CYNTA_UINT8_ARRAY_CAPACITY)
         {
             return CYNTA_PARSER_ERROR_OUT_OF_CAPACITY;
         }
