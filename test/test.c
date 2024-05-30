@@ -465,7 +465,58 @@ static size_t test_complex_examples(void)
                                  .stream_size = 2,
                                  .expected = CYNTA_PARSER_SUCCESS,
                                  .expected_out = (uint8_t[]){0xAB, 0xEF},
-                                 .expected_out_size = 2}};
+                                 .expected_out_size = 2},
+                                {.parser = cynta_choice(2,
+                                                        cynta_choice(2, // ORCA GC Controller
+                                                                     cynta_value((uint8_t)'@'),
+                                                                     cynta_sequence(5,
+                                                                                    cynta_value(0x80),
+                                                                                    cynta_many(cynta_value(0xFF)),
+                                                                                    cynta_any(),
+                                                                                    cynta_many(cynta_value(0xFF)),
+                                                                                    cynta_any())),
+                                                        cynta_sequence(2, // NX Macro Controller
+                                                                       cynta_value(0xAB),
+                                                                       cynta_repeat(cynta_any(), 10))),
+                                 .stream = (uint8_t[]){0xAB, 0xFF, 0x3F, 0x08, 0x80, 0x80, 0x80, 0x80, 0x00, 0x00, 0x00},
+                                 .stream_size = 11,
+                                 .expected = CYNTA_PARSER_SUCCESS,
+                                 .expected_out = (uint8_t[]){0xAB, 0xFF, 0x3F, 0x08, 0x80, 0x80, 0x80, 0x80, 0x00, 0x00, 0x00},
+                                 .expected_out_size = 11},
+                                {.parser = cynta_choice(2,
+                                                        cynta_choice(2, // ORCA GC Controller
+                                                                     cynta_value((uint8_t)'@'),
+                                                                     cynta_sequence(5,
+                                                                                    cynta_value(0x80),
+                                                                                    cynta_many(cynta_value(0xFF)),
+                                                                                    cynta_any(),
+                                                                                    cynta_many(cynta_value(0xFF)),
+                                                                                    cynta_any())),
+                                                        cynta_sequence(2, // NX Macro Controller
+                                                                       cynta_value(0xAB),
+                                                                       cynta_repeat(cynta_any(), 10))),
+                                 .stream = (uint8_t[]){(uint8_t)'@'},
+                                 .stream_size = 1,
+                                 .expected = CYNTA_PARSER_SUCCESS,
+                                 .expected_out = (uint8_t[]){(uint8_t)'@'},
+                                 .expected_out_size = 1},
+                                {.parser = cynta_choice(2,
+                                                        cynta_choice(2, // ORCA GC Controller
+                                                                     cynta_value((uint8_t)'@'),
+                                                                     cynta_sequence(5,
+                                                                                    cynta_value(0x80),
+                                                                                    cynta_many(cynta_value(0xFF)),
+                                                                                    cynta_any(),
+                                                                                    cynta_many(cynta_value(0xFF)),
+                                                                                    cynta_any())),
+                                                        cynta_sequence(2, // NX Macro Controller
+                                                                       cynta_value(0xAB),
+                                                                       cynta_repeat(cynta_any(), 10))),
+                                 .stream = (uint8_t[]){0x80, 0xAB, 0xCD},
+                                 .stream_size = 3,
+                                 .expected = CYNTA_PARSER_SUCCESS,
+                                 .expected_out = (uint8_t[]){0x80, 0xAB, 0xCD},
+                                 .expected_out_size = 3}};
     size_t test_cases_size = TEST_SIZEOF(test_cases);
     size_t test_failure_count = 0;
 
