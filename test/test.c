@@ -362,6 +362,78 @@ static size_t test_many(void)
     return test_failure_count;
 }
 
+static size_t test_choice(void)
+{
+    printf("* %s\n", __func__);
+
+    typedef struct test_case_t
+    {
+        cynta_parser_t *parser;
+        uint8_t *stream;
+        size_t stream_size;
+
+        cynta_parser_error_t expected;
+        uint8_t *expected_out;
+        size_t expected_out_size;
+    } test_case_t;
+
+    test_case_t test_cases[] = {{.parser = cynta_choice(3,
+                                                        cynta_value(0xAB),
+                                                        cynta_value(0xCD),
+                                                        cynta_value(0xEF)),
+                                 .stream = (uint8_t[]){0xAB},
+                                 .stream_size = 1,
+                                 .expected = CYNTA_PARSER_SUCCESS,
+                                 .expected_out = (uint8_t[]){0xAB},
+                                 .expected_out_size = 1},
+                                {.parser = cynta_choice(3,
+                                                        cynta_value(0xAB),
+                                                        cynta_value(0xCD),
+                                                        cynta_value(0xEF)),
+                                 .stream = (uint8_t[]){0xCD},
+                                 .stream_size = 1,
+                                 .expected = CYNTA_PARSER_SUCCESS,
+                                 .expected_out = (uint8_t[]){0xCD},
+                                 .expected_out_size = 1},
+                                {.parser = cynta_choice(3,
+                                                        cynta_value(0xAB),
+                                                        cynta_value(0xCD),
+                                                        cynta_value(0xEF)),
+                                 .stream = (uint8_t[]){0xEF},
+                                 .stream_size = 1,
+                                 .expected = CYNTA_PARSER_SUCCESS,
+                                 .expected_out = (uint8_t[]){0xEF},
+                                 .expected_out_size = 1},
+                                {.parser = cynta_choice(3,
+                                                        cynta_value(0xAB),
+                                                        cynta_value(0xCD),
+                                                        cynta_value(0xEF)),
+                                 .stream = (uint8_t[]){0xAA}, // no match
+                                 .stream_size = 1,
+                                 .expected = CYNTA_PARSER_ERROR_UNEXPECTED_VALUE,
+                                 .expected_out = NULL,
+                                 .expected_out_size = 0}};
+    size_t test_cases_size = TEST_SIZEOF(test_cases);
+    size_t test_failure_count = 0;
+
+    for (size_t i = 0; i < test_cases_size; i++)
+    {
+        test_case_t *test_case = &test_cases[i];
+        if (!test_parser_helper(i,
+                                test_case->parser,
+                                test_case->stream,
+                                test_case->stream_size,
+                                test_case->expected,
+                                test_case->expected_out,
+                                test_case->expected_out_size))
+        {
+            test_failure_count++;
+        }
+    }
+
+    return test_failure_count;
+}
+
 static size_t test_complex_examples(void)
 {
     printf("* %s\n", __func__);
@@ -385,7 +457,15 @@ static size_t test_complex_examples(void)
                                  .stream_size = 5,
                                  .expected = CYNTA_PARSER_SUCCESS,
                                  .expected_out = (uint8_t[]){0xAB, 128, 128, 128, 129},
-                                 .expected_out_size = 5}};
+                                 .expected_out_size = 5},
+                                {.parser = cynta_choice(2, // backtracing
+                                                        cynta_sequence(2, cynta_value(0xAB), cynta_value(0xCD)),
+                                                        cynta_sequence(2, cynta_value(0xAB), cynta_value(0xEF))),
+                                 .stream = (uint8_t[]){0xAB, 0xEF},
+                                 .stream_size = 2,
+                                 .expected = CYNTA_PARSER_SUCCESS,
+                                 .expected_out = (uint8_t[]){0xAB, 0xEF},
+                                 .expected_out_size = 2}};
     size_t test_cases_size = TEST_SIZEOF(test_cases);
     size_t test_failure_count = 0;
 
@@ -418,6 +498,7 @@ int main(void)
     test_failure_count += test_sequence();
     test_failure_count += test_repeat();
     test_failure_count += test_many();
+    test_failure_count += test_choice();
     test_failure_count += test_complex_examples();
 
     if (test_failure_count == 0)
