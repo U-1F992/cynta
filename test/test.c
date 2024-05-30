@@ -5,7 +5,7 @@
 #include "test.h"
 #include "test_array_stream.h"
 
-void test_stream(void)
+static void test_stream(void)
 {
     printf("* %s\n", __func__);
 
@@ -54,11 +54,11 @@ void test_stream(void)
     assert(CYNTA_STREAM_ERROR_END_OF_STREAM == cynta_stream_next((cynta_stream_t *)&stream, &out));
 }
 
-static bool test_parser_uint8(size_t index,
-                              cynta_parser_t *parser,
-                              uint8_t stream[], size_t stream_size,
-                              cynta_parser_error_t expected,
-                              uint8_t expected_out[], size_t expected_out_size)
+static bool test_parser_helper(size_t index,
+                               cynta_parser_t *parser,
+                               uint8_t stream[], size_t stream_size,
+                               cynta_parser_error_t expected,
+                               uint8_t expected_out[], size_t expected_out_size)
 {
     test_array_stream_t test_stream;
     assert(CYNTA_STREAM_SUCCESS == test_array_stream_init(&test_stream, stream, stream_size));
@@ -137,13 +137,13 @@ static size_t test_any(void)
     for (size_t i = 0; i < test_cases_size; i++)
     {
         test_case_t *test_case = &test_cases[i];
-        if (!test_parser_uint8(i,
-                               test_case->parser,
-                               test_case->stream,
-                               test_case->stream_size,
-                               test_case->expected,
-                               test_case->expected_out,
-                               test_case->expected_out_size))
+        if (!test_parser_helper(i,
+                                test_case->parser,
+                                test_case->stream,
+                                test_case->stream_size,
+                                test_case->expected,
+                                test_case->expected_out,
+                                test_case->expected_out_size))
         {
             test_failure_count++;
         }
@@ -185,13 +185,13 @@ static size_t test_value(void)
     for (size_t i = 0; i < test_cases_size; i++)
     {
         test_case_t *test_case = &test_cases[i];
-        if (!test_parser_uint8(i,
-                               test_case->parser,
-                               test_case->stream,
-                               test_case->stream_size,
-                               test_case->expected,
-                               test_case->expected_out,
-                               test_case->expected_out_size))
+        if (!test_parser_helper(i,
+                                test_case->parser,
+                                test_case->stream,
+                                test_case->stream_size,
+                                test_case->expected,
+                                test_case->expected_out,
+                                test_case->expected_out_size))
         {
             test_failure_count++;
         }
@@ -242,13 +242,13 @@ static size_t test_sequence(void)
     for (size_t i = 0; i < test_cases_size; i++)
     {
         test_case_t *test_case = &test_cases[i];
-        if (!test_parser_uint8(i,
-                               test_case->parser,
-                               test_case->stream,
-                               test_case->stream_size,
-                               test_case->expected,
-                               test_case->expected_out,
-                               test_case->expected_out_size))
+        if (!test_parser_helper(i,
+                                test_case->parser,
+                                test_case->stream,
+                                test_case->stream_size,
+                                test_case->expected,
+                                test_case->expected_out,
+                                test_case->expected_out_size))
         {
             test_failure_count++;
         }
@@ -290,13 +290,13 @@ static size_t test_repeat(void)
     for (size_t i = 0; i < test_cases_size; i++)
     {
         test_case_t *test_case = &test_cases[i];
-        if (!test_parser_uint8(i,
-                               test_case->parser,
-                               test_case->stream,
-                               test_case->stream_size,
-                               test_case->expected,
-                               test_case->expected_out,
-                               test_case->expected_out_size))
+        if (!test_parser_helper(i,
+                                test_case->parser,
+                                test_case->stream,
+                                test_case->stream_size,
+                                test_case->expected,
+                                test_case->expected_out,
+                                test_case->expected_out_size))
         {
             test_failure_count++;
         }
@@ -344,13 +344,13 @@ static size_t test_many(void)
     for (size_t i = 0; i < test_cases_size; i++)
     {
         test_case_t *test_case = &test_cases[i];
-        if (!test_parser_uint8(i,
-                               test_case->parser,
-                               test_case->stream,
-                               test_case->stream_size,
-                               test_case->expected,
-                               test_case->expected_out,
-                               test_case->expected_out_size))
+        if (!test_parser_helper(i,
+                                test_case->parser,
+                                test_case->stream,
+                                test_case->stream_size,
+                                test_case->expected,
+                                test_case->expected_out,
+                                test_case->expected_out_size))
         {
             test_failure_count++;
         }
@@ -388,13 +388,13 @@ static size_t test_complex_examples(void)
     for (size_t i = 0; i < test_cases_size; i++)
     {
         test_case_t *test_case = &test_cases[i];
-        if (!test_parser_uint8(i,
-                               test_case->parser,
-                               test_case->stream,
-                               test_case->stream_size,
-                               test_case->expected,
-                               test_case->expected_out,
-                               test_case->expected_out_size))
+        if (!test_parser_helper(i,
+                                test_case->parser,
+                                test_case->stream,
+                                test_case->stream_size,
+                                test_case->expected,
+                                test_case->expected_out,
+                                test_case->expected_out_size))
         {
             test_failure_count++;
         }
