@@ -36,11 +36,13 @@ static cynta_parser_error_t satisfy_apply(cynta_parser_t *base,
 cynta_parser_error_t cynta_satisfy_init(cynta_satisfy_t *self,
                                         bool (*condition)(cynta_satisfy_t *,
                                                           uint8_t)) {
+    static cynta_parser_vtable_t vtbl = {.apply = satisfy_apply};
+
     if (self == NULL || condition == NULL) {
         return CYNTA_PARSER_ERROR_NULL_POINTER;
     }
 
-    self->base.apply = satisfy_apply;
+    self->base.vtbl = &vtbl;
     self->condition = condition;
 
     return CYNTA_PARSER_SUCCESS;

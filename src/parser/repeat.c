@@ -36,11 +36,13 @@ static cynta_parser_error_t repeat_apply(cynta_parser_t *base,
 
 cynta_parser_error_t cynta_repeat_init(cynta_repeat_t *self,
                                        cynta_parser_t *parser, size_t count) {
+    static cynta_parser_vtable_t vtbl = {.apply = repeat_apply};
+
     if (self == NULL || parser == NULL) {
         return CYNTA_PARSER_ERROR_NULL_POINTER;
     }
 
-    self->base.apply = repeat_apply;
+    self->base.vtbl = &vtbl;
     self->parser = parser;
     self->count = count;
 

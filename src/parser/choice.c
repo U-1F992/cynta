@@ -29,6 +29,8 @@ static cynta_parser_error_t choice_apply(cynta_parser_t *base,
 
 cynta_parser_error_t cynta_internal_choice_init(cynta_choice_t *self,
                                                 size_t size, va_list args) {
+    static cynta_parser_vtable_t vtbl = {.apply = choice_apply};
+
     if (self == NULL) {
         return CYNTA_PARSER_ERROR_NULL_POINTER;
     }
@@ -37,7 +39,7 @@ cynta_parser_error_t cynta_internal_choice_init(cynta_choice_t *self,
         return CYNTA_PARSER_ERROR_OUT_OF_CAPACITY;
     }
 
-    self->base.apply = choice_apply;
+    self->base.vtbl = &vtbl;
     for (size_t i = 0; i < size; i++) {
         if ((self->parsers[i] = va_arg(args, cynta_parser_t *)) == NULL) {
             return CYNTA_PARSER_ERROR_NULL_POINTER;
@@ -49,27 +51,11 @@ cynta_parser_error_t cynta_internal_choice_init(cynta_choice_t *self,
 }
 
 cynta_parser_error_t cynta_choice_init(cynta_choice_t *self, size_t size, ...) {
-    if (self == NULL) {
-        return CYNTA_PARSER_ERROR_NULL_POINTER;
-    }
-
-    if (size < 1 || CYNTA_CHOICE_VA_ARGS_CAPACITY < size) {
-        return CYNTA_PARSER_ERROR_OUT_OF_CAPACITY;
-    }
-
-    self->base.apply = choice_apply;
     va_list args;
     va_start(args, size);
-    for (size_t i = 0; i < size; i++) {
-        if ((self->parsers[i] = va_arg(args, cynta_parser_t *)) == NULL) {
-            va_end(args);
-            return CYNTA_PARSER_ERROR_NULL_POINTER;
-        }
-    }
+    cynta_parser_error_t ret = cynta_internal_choice_init(self, size, args);
     va_end(args);
-    self->parsers_size = size;
-
-    return CYNTA_PARSER_SUCCESS;
+    return ret;
 }
 
 #endif

@@ -143,9 +143,14 @@ typedef enum cynta_parser_error_t {
          ? "CYNTA_PARSER_ERROR_INTERNAL"                                       \
          : (assert(0), "CYNTA_PARSER_ERROR_UNKNOWN"))
 
+typedef struct cynta_parser_t cynta_parser_t;
+
+typedef struct cynta_parser_vtable_t {
+    cynta_parser_error_t (*apply)(cynta_parser_t *, cynta_stream_t *, void *);
+} cynta_parser_vtable_t;
+
 typedef struct cynta_parser_t {
-    cynta_parser_error_t (*apply)(struct cynta_parser_t *, cynta_stream_t *,
-                                  void *);
+    cynta_parser_vtable_t *vtbl;
 } cynta_parser_t;
 
 static inline cynta_parser_error_t
@@ -153,7 +158,7 @@ cynta_parser_apply(cynta_parser_t *self, cynta_stream_t *stream, void *out) {
     if (self == NULL) {
         return CYNTA_PARSER_ERROR_NULL_POINTER;
     }
-    return self->apply(self, stream, out);
+    return self->vtbl->apply(self, stream, out);
 }
 
 /******************/
@@ -259,9 +264,9 @@ typedef struct cynta_sequence_t {
     cynta_uint8_array_t incoming_buffer;
 } cynta_sequence_t;
 
-cynta_parser_error_t cynta_sequence_init(cynta_sequence_t *, size_t, ...);
 cynta_parser_error_t cynta_internal_sequence_init(cynta_sequence_t *, size_t,
                                                   va_list);
+cynta_parser_error_t cynta_sequence_init(cynta_sequence_t *, size_t, ...);
 
 static inline cynta_parser_t *cynta_sequence(size_t size, ...) {
     static cynta_sequence_t pool[CYNTA_GLOBAL_POOL_SEQUENCE_CAPACITY];
@@ -388,9 +393,9 @@ typedef struct cynta_choice_t {
     size_t parsers_size;
 } cynta_choice_t;
 
-cynta_parser_error_t cynta_choice_init(cynta_choice_t *, size_t, ...);
 cynta_parser_error_t cynta_internal_choice_init(cynta_choice_t *, size_t,
                                                 va_list);
+cynta_parser_error_t cynta_choice_init(cynta_choice_t *, size_t, ...);
 
 static inline cynta_parser_t *cynta_choice(size_t size, ...) {
     static cynta_choice_t pool[CYNTA_GLOBAL_POOL_CHOICE_CAPACITY];

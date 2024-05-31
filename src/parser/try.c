@@ -21,11 +21,13 @@ static cynta_parser_error_t try_apply(cynta_parser_t *base,
 }
 
 cynta_parser_error_t cynta_try_init(cynta_try_t *self, cynta_parser_t *parser) {
+    static cynta_parser_vtable_t vtbl = {.apply = try_apply};
+
     if (self == NULL || parser == NULL) {
         return CYNTA_PARSER_ERROR_NULL_POINTER;
     }
 
-    self->base.apply = try_apply;
+    self->base.vtbl = &vtbl;
     self->parser = parser;
 
     return CYNTA_PARSER_SUCCESS;
