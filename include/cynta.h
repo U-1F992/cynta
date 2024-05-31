@@ -106,18 +106,18 @@ cynta_stream_error_t cynta_stream_discard_checkpoint(cynta_stream_t *);
 cynta_stream_error_t cynta_stream_next(cynta_stream_t *, uint8_t *);
 cynta_stream_error_t cynta_stream_init(cynta_stream_t *);
 
-/*****************/
+/***************/
 /* uint8_array */
-/*****************/
+/***************/
 
 typedef struct cynta_uint8_array_t {
     uint8_t data[CYNTA_UINT8_ARRAY_CAPACITY];
     size_t size;
 } cynta_uint8_array_t;
 
-/*****************/
+/**********/
 /* parser */
-/*****************/
+/**********/
 
 typedef enum cynta_parser_error_t {
     CYNTA_PARSER_SUCCESS,
@@ -151,9 +151,9 @@ typedef struct cynta_parser_t {
     ((parser) == NULL ? CYNTA_PARSER_ERROR_NULL_POINTER                        \
                       : (parser)->apply((parser), (stream), (out)))
 
-/*****************/
+/******************/
 /* parser/satisfy */
-/*****************/
+/******************/
 
 #if (0 < CYNTA_GLOBAL_POOL_SATISFY_CAPACITY + CYNTA_GLOBAL_POOL_ANY_CAPACITY + \
              CYNTA_GLOBAL_POOL_VALUE_CAPACITY)
@@ -183,9 +183,9 @@ extern size_t __cynta_global_pool_satisfy_index;
 
 #endif
 
-/*****************/
+/**************/
 /* parser/any */
-/*****************/
+/**************/
 
 #if (0 < CYNTA_GLOBAL_POOL_ANY_CAPACITY)
 
@@ -209,9 +209,9 @@ extern size_t __cynta_global_pool_any_index;
 
 #endif
 
-/*****************/
+/****************/
 /* parser/value */
-/*****************/
+/****************/
 
 #if (0 < CYNTA_GLOBAL_POOL_VALUE_CAPACITY)
 
@@ -239,9 +239,9 @@ extern size_t __cynta_global_pool_value_index;
 
 #endif
 
-/*****************/
+/*******************/
 /* parser/sequence */
-/*****************/
+/*******************/
 
 #if (0 < CYNTA_GLOBAL_POOL_SEQUENCE_CAPACITY)
 
@@ -304,9 +304,9 @@ extern size_t __cynta_global_pool_repeat_index;
 
 #endif
 
-/*****************/
+/***************/
 /* parser/many */
-/*****************/
+/***************/
 
 #if (0 < CYNTA_GLOBAL_POOL_MANY_CAPACITY)
 
@@ -331,9 +331,9 @@ extern size_t __cynta_global_pool_many_index;
          : (cynta_parser_t                                                     \
                 *)&__cynta_global_pool_many[__cynta_global_pool_many_index++])
 
-/*****************/
+/**************/
 /* parser/try */
-/*****************/
+/**************/
 
 #if (0 < CYNTA_GLOBAL_POOL_TRY_CAPACITY)
 
