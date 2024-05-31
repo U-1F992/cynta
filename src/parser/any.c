@@ -1,6 +1,6 @@
 #include <cynta.h>
 
-#if (0 < CYNTA_GLOBAL_POOL_ANY_CAPACITY)
+#if (0 < CYNTA_ANY_POOL_CAPACITY)
 
 static bool any_condition(cynta_satisfy_t *base, uint8_t incoming) {
     return true;

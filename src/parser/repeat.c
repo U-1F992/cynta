@@ -1,6 +1,6 @@
 #include <cynta.h>
 
-#if (0 < CYNTA_GLOBAL_POOL_REPEAT_CAPACITY)
+#if (0 < CYNTA_REPEAT_POOL_CAPACITY)
 
 #include <string.h>
 

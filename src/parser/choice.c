@@ -1,6 +1,6 @@
 #include <cynta.h>
 
-#if (0 < CYNTA_GLOBAL_POOL_CHOICE_CAPACITY)
+#if (0 < CYNTA_CHOICE_POOL_CAPACITY)
 
 static cynta_parser_error_t choice_apply(cynta_parser_t *base,
                                          cynta_stream_t *stream, void *out) {
@@ -35,7 +35,7 @@ cynta_parser_error_t cynta_internal_choice_init(cynta_choice_t *self,
         return CYNTA_PARSER_ERROR_NULL_POINTER;
     }
 
-    if (size < 1 || CYNTA_CHOICE_VA_ARGS_CAPACITY < size) {
+    if (size < 1 || CYNTA_CHOICE_ARGS_CAPACITY < size) {
         return CYNTA_PARSER_ERROR_OUT_OF_CAPACITY;
     }
 

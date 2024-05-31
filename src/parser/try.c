@@ -1,6 +1,6 @@
 #include <cynta.h>
 
-#if (0 < CYNTA_GLOBAL_POOL_TRY_CAPACITY)
+#if (0 < CYNTA_TRY_POOL_CAPACITY)
 
 static cynta_parser_error_t try_apply(cynta_parser_t *base,
                                       cynta_stream_t *stream, void *out) {

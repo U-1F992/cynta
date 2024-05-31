@@ -1,6 +1,6 @@
 #include <cynta.h>
 
-#if (0 < CYNTA_GLOBAL_POOL_SEQUENCE_CAPACITY)
+#if (0 < CYNTA_SEQUENCE_POOL_CAPACITY)
 
 #include <string.h>
 
@@ -42,7 +42,7 @@ cynta_parser_error_t cynta_internal_sequence_init(cynta_sequence_t *self,
         return CYNTA_PARSER_ERROR_NULL_POINTER;
     }
 
-    if (size < 1 || CYNTA_SEQUENCE_VA_ARGS_CAPACITY < size) {
+    if (size < 1 || CYNTA_SEQUENCE_ARGS_CAPACITY < size) {
         return CYNTA_PARSER_ERROR_OUT_OF_CAPACITY;
     }
 
