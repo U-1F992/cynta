@@ -2,11 +2,6 @@
 
 #if (0 < CYNTA_GLOBAL_POOL_CHOICE_CAPACITY)
 
-#include <stdarg.h>
-
-cynta_choice_t __cynta_global_pool_choice[CYNTA_GLOBAL_POOL_CHOICE_CAPACITY];
-size_t __cynta_global_pool_choice_index = 0;
-
 static cynta_parser_error_t choice_apply(cynta_parser_t *base,
                                          cynta_stream_t *stream, void *out) {
     cynta_choice_t *self = (cynta_choice_t *)base;
@@ -32,6 +27,27 @@ static cynta_parser_error_t choice_apply(cynta_parser_t *base,
     return err; // Return the last error encountered
 }
 
+cynta_parser_error_t cynta_internal_choice_init(cynta_choice_t *self,
+                                                size_t size, va_list args) {
+    if (self == NULL) {
+        return CYNTA_PARSER_ERROR_NULL_POINTER;
+    }
+
+    if (size < 1 || CYNTA_CHOICE_VA_ARGS_CAPACITY < size) {
+        return CYNTA_PARSER_ERROR_OUT_OF_CAPACITY;
+    }
+
+    self->base.apply = choice_apply;
+    for (size_t i = 0; i < size; i++) {
+        if ((self->parsers[i] = va_arg(args, cynta_parser_t *)) == NULL) {
+            return CYNTA_PARSER_ERROR_NULL_POINTER;
+        }
+    }
+    self->parsers_size = size;
+
+    return CYNTA_PARSER_SUCCESS;
+}
+
 cynta_parser_error_t cynta_choice_init(cynta_choice_t *self, size_t size, ...) {
     if (self == NULL) {
         return CYNTA_PARSER_ERROR_NULL_POINTER;
@@ -42,15 +58,15 @@ cynta_parser_error_t cynta_choice_init(cynta_choice_t *self, size_t size, ...) {
     }
 
     self->base.apply = choice_apply;
-    va_list ap;
-    va_start(ap, size);
+    va_list args;
+    va_start(args, size);
     for (size_t i = 0; i < size; i++) {
-        if ((self->parsers[i] = va_arg(ap, cynta_parser_t *)) == NULL) {
-            va_end(ap);
+        if ((self->parsers[i] = va_arg(args, cynta_parser_t *)) == NULL) {
+            va_end(args);
             return CYNTA_PARSER_ERROR_NULL_POINTER;
         }
     }
-    va_end(ap);
+    va_end(args);
     self->parsers_size = size;
 
     return CYNTA_PARSER_SUCCESS;

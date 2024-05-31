@@ -2,9 +2,6 @@
 
 #if (0 < CYNTA_GLOBAL_POOL_TRY_CAPACITY)
 
-cynta_try_t __cynta_global_pool_try[CYNTA_GLOBAL_POOL_TRY_CAPACITY];
-size_t __cynta_global_pool_try_index = 0;
-
 static cynta_parser_error_t try_apply(cynta_parser_t *base,
                                       cynta_stream_t *stream, void *out) {
     cynta_try_t *self = (cynta_try_t *)base;

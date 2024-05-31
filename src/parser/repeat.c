@@ -4,9 +4,6 @@
 
 #include <string.h>
 
-cynta_repeat_t __cynta_global_pool_repeat[CYNTA_GLOBAL_POOL_REPEAT_CAPACITY];
-size_t __cynta_global_pool_repeat_index = 0;
-
 static cynta_parser_error_t repeat_apply(cynta_parser_t *base,
                                          cynta_stream_t *stream, void *out) {
     cynta_repeat_t *self = (cynta_repeat_t *)base;
@@ -37,15 +34,15 @@ static cynta_parser_error_t repeat_apply(cynta_parser_t *base,
     return CYNTA_PARSER_SUCCESS;
 }
 
-cynta_parser_error_t cynta_repeat_init(cynta_repeat_t *self, cynta_parser_t *p,
-                                       size_t n) {
-    if (self == NULL || p == NULL) {
+cynta_parser_error_t cynta_repeat_init(cynta_repeat_t *self,
+                                       cynta_parser_t *parser, size_t count) {
+    if (self == NULL || parser == NULL) {
         return CYNTA_PARSER_ERROR_NULL_POINTER;
     }
 
     self->base.apply = repeat_apply;
-    self->parser = p;
-    self->count = n;
+    self->parser = parser;
+    self->count = count;
 
     return CYNTA_PARSER_SUCCESS;
 }

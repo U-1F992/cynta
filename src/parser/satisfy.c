@@ -3,9 +3,6 @@
 #if (0 < CYNTA_GLOBAL_POOL_SATISFY_CAPACITY + CYNTA_GLOBAL_POOL_ANY_CAPACITY + \
              CYNTA_GLOBAL_POOL_VALUE_CAPACITY)
 
-cynta_satisfy_t __cynta_global_pool_satisfy[CYNTA_GLOBAL_POOL_SATISFY_CAPACITY];
-size_t __cynta_global_pool_satisfy_index = 0;
-
 static cynta_parser_error_t satisfy_apply(cynta_parser_t *base,
                                           cynta_stream_t *stream, void *out) {
     cynta_satisfy_t *self = (cynta_satisfy_t *)base;
@@ -37,14 +34,14 @@ static cynta_parser_error_t satisfy_apply(cynta_parser_t *base,
 }
 
 cynta_parser_error_t cynta_satisfy_init(cynta_satisfy_t *self,
-                                        bool (*cond)(cynta_satisfy_t *,
-                                                     uint8_t)) {
-    if (self == NULL || cond == NULL) {
+                                        bool (*condition)(cynta_satisfy_t *,
+                                                          uint8_t)) {
+    if (self == NULL || condition == NULL) {
         return CYNTA_PARSER_ERROR_NULL_POINTER;
     }
 
     self->base.apply = satisfy_apply;
-    self->condition = cond;
+    self->condition = condition;
 
     return CYNTA_PARSER_SUCCESS;
 }

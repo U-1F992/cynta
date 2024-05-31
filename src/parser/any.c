@@ -2,9 +2,6 @@
 
 #if (0 < CYNTA_GLOBAL_POOL_ANY_CAPACITY)
 
-cynta_any_t __cynta_global_pool_any[CYNTA_GLOBAL_POOL_ANY_CAPACITY];
-size_t __cynta_global_pool_any_index = 0;
-
 static bool any_condition(cynta_satisfy_t *base, uint8_t incoming) {
     return true;
 }

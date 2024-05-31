@@ -2,12 +2,7 @@
 
 #if (0 < CYNTA_GLOBAL_POOL_SEQUENCE_CAPACITY)
 
-#include <stdarg.h>
 #include <string.h>
-
-cynta_sequence_t
-    __cynta_global_pool_sequence[CYNTA_GLOBAL_POOL_SEQUENCE_CAPACITY];
-size_t __cynta_global_pool_sequence_index = 0;
 
 static cynta_parser_error_t sequence_apply(cynta_parser_t *base,
                                            cynta_stream_t *stream, void *out) {
@@ -39,6 +34,27 @@ static cynta_parser_error_t sequence_apply(cynta_parser_t *base,
     return CYNTA_PARSER_SUCCESS;
 }
 
+cynta_parser_error_t cynta_internal_sequence_init(cynta_sequence_t *self,
+                                                  size_t size, va_list args) {
+    if (self == NULL) {
+        return CYNTA_PARSER_ERROR_NULL_POINTER;
+    }
+
+    if (size < 1 || CYNTA_SEQUENCE_VA_ARGS_CAPACITY < size) {
+        return CYNTA_PARSER_ERROR_OUT_OF_CAPACITY;
+    }
+
+    self->base.apply = sequence_apply;
+    for (size_t i = 0; i < size; i++) {
+        if ((self->parsers[i] = va_arg(args, cynta_parser_t *)) == NULL) {
+            return CYNTA_PARSER_ERROR_NULL_POINTER;
+        }
+    }
+    self->parsers_size = size;
+
+    return CYNTA_PARSER_SUCCESS;
+}
+
 cynta_parser_error_t cynta_sequence_init(cynta_sequence_t *self, size_t size,
                                          ...) {
     if (self == NULL) {
@@ -50,15 +66,15 @@ cynta_parser_error_t cynta_sequence_init(cynta_sequence_t *self, size_t size,
     }
 
     self->base.apply = sequence_apply;
-    va_list ap;
-    va_start(ap, size);
+    va_list args;
+    va_start(args, size);
     for (size_t i = 0; i < size; i++) {
-        if ((self->parsers[i] = va_arg(ap, cynta_parser_t *)) == NULL) {
-            va_end(ap);
+        if ((self->parsers[i] = va_arg(args, cynta_parser_t *)) == NULL) {
+            va_end(args);
             return CYNTA_PARSER_ERROR_NULL_POINTER;
         }
     }
-    va_end(ap);
+    va_end(args);
     self->parsers_size = size;
 
     return CYNTA_PARSER_SUCCESS;

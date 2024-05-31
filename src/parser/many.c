@@ -4,9 +4,6 @@
 
 #include <string.h>
 
-cynta_many_t __cynta_global_pool_many[CYNTA_GLOBAL_POOL_MANY_CAPACITY];
-size_t __cynta_global_pool_many_index = 0;
-
 static cynta_parser_error_t many_apply(cynta_parser_t *base,
                                        cynta_stream_t *stream, void *out) {
     cynta_many_t *self = (cynta_many_t *)base;
@@ -53,13 +50,14 @@ commit:
     return CYNTA_PARSER_SUCCESS;
 }
 
-cynta_parser_error_t cynta_many_init(cynta_many_t *self, cynta_parser_t *p) {
-    if (self == NULL || p == NULL) {
+cynta_parser_error_t cynta_many_init(cynta_many_t *self,
+                                     cynta_parser_t *parser) {
+    if (self == NULL || parser == NULL) {
         return CYNTA_PARSER_ERROR_NULL_POINTER;
     }
 
     self->base.apply = many_apply;
-    self->parser = p;
+    self->parser = parser;
 
     return CYNTA_PARSER_SUCCESS;
 }
