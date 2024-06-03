@@ -107,6 +107,13 @@ cynta_stream_error_t cynta_stream_discard_checkpoint(cynta_stream_t *);
 cynta_stream_error_t cynta_stream_next(cynta_stream_t *, uint8_t *);
 cynta_stream_error_t cynta_stream_init(cynta_stream_t *);
 
+typedef bool cynta_transaction_status_t;
+#define CYNTA_TRANSACTION_COMMIT ((cynta_transaction_status_t) true)
+#define CYNTA_TRANSACTION_ROLLBACK ((cynta_transaction_status_t) false)
+cynta_stream_error_t cynta_stream_begin_transaction(
+    cynta_stream_t *, cynta_transaction_status_t (*)(cynta_stream_t *, void *),
+    void *);
+
 /***************/
 /* uint8_array */
 /***************/
