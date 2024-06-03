@@ -101,9 +101,6 @@ typedef struct cynta_stream_t {
     size_t checkpoints_size;
 } cynta_stream_t;
 
-cynta_stream_error_t cynta_stream_push_checkpoint(cynta_stream_t *);
-cynta_stream_error_t cynta_stream_rewind(cynta_stream_t *);
-cynta_stream_error_t cynta_stream_discard_checkpoint(cynta_stream_t *);
 cynta_stream_error_t cynta_stream_next(cynta_stream_t *, uint8_t *);
 cynta_stream_error_t cynta_stream_init(cynta_stream_t *);
 

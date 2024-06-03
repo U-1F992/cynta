@@ -5,6 +5,72 @@
 #include "test.h"
 #include "test_array_stream.h"
 
+static cynta_transaction_status_t test_commit(cynta_stream_t *stream,
+                                              void *other_data) {
+    return CYNTA_TRANSACTION_COMMIT;
+}
+
+static cynta_transaction_status_t test_rollback(cynta_stream_t *stream,
+                                                void *other_data) {
+    return CYNTA_TRANSACTION_ROLLBACK;
+}
+
+static cynta_transaction_status_t test_stream_0(cynta_stream_t *stream,
+                                                void *other_data) {
+    assert(other_data == NULL);
+    uint8_t out;
+    assert(CYNTA_STREAM_SUCCESS == cynta_stream_next(stream, &out) && out == 1);
+    return CYNTA_TRANSACTION_ROLLBACK;
+}
+
+static cynta_transaction_status_t test_stream_1(cynta_stream_t *stream,
+                                                void *other_data) {
+    assert(other_data == NULL);
+    uint8_t out;
+    assert(CYNTA_STREAM_SUCCESS == cynta_stream_next(stream, &out) && out == 3);
+    return CYNTA_TRANSACTION_ROLLBACK;
+}
+
+static cynta_transaction_status_t test_stream_2(cynta_stream_t *stream,
+                                                void *other_data) {
+    assert(other_data == NULL);
+    uint8_t out;
+    assert(CYNTA_STREAM_SUCCESS == cynta_stream_next(stream, &out) && out == 2);
+    assert(CYNTA_STREAM_SUCCESS ==
+           cynta_stream_begin_transaction(stream, test_stream_1, NULL));
+    assert(CYNTA_STREAM_SUCCESS == cynta_stream_next(stream, &out) && out == 3);
+    return CYNTA_TRANSACTION_ROLLBACK;
+}
+
+static cynta_transaction_status_t test_stream_3(cynta_stream_t *stream,
+                                                void *other_data) {
+    assert(other_data == NULL);
+    uint8_t out;
+    assert(CYNTA_STREAM_SUCCESS == cynta_stream_next(stream, &out) && out == 6);
+    return CYNTA_TRANSACTION_COMMIT;
+}
+
+static cynta_transaction_status_t test_stream_4(cynta_stream_t *stream,
+                                                void *other_data) {
+    assert(other_data == NULL);
+    uint8_t out;
+    assert(CYNTA_STREAM_SUCCESS == cynta_stream_next(stream, &out) && out == 4);
+    assert(CYNTA_STREAM_SUCCESS == cynta_stream_next(stream, &out) && out == 5);
+    assert(CYNTA_STREAM_SUCCESS ==
+           cynta_stream_begin_transaction(stream, test_stream_3, NULL));
+    assert(CYNTA_STREAM_SUCCESS == cynta_stream_next(stream, &out) && out == 7);
+    return CYNTA_TRANSACTION_ROLLBACK;
+}
+
+static cynta_transaction_status_t test_stream_5(cynta_stream_t *stream,
+                                                void *other_data) {
+    assert(other_data == NULL);
+    uint8_t out;
+    assert(CYNTA_STREAM_SUCCESS == cynta_stream_next(stream, &out) && out == 6);
+    assert(CYNTA_STREAM_SUCCESS == cynta_stream_next(stream, &out) && out == 7);
+    return CYNTA_TRANSACTION_ROLLBACK;
+}
+
 static void test_stream(void) {
     printf("* %s\n", __func__);
 
@@ -20,44 +86,24 @@ static void test_stream(void) {
     assert(CYNTA_STREAM_SUCCESS ==
                cynta_stream_next((cynta_stream_t *)&stream, &out) &&
            out == 0);
-
     assert(CYNTA_STREAM_SUCCESS ==
-           cynta_stream_push_checkpoint((cynta_stream_t *)&stream));
-    assert(CYNTA_STREAM_SUCCESS ==
-               cynta_stream_next((cynta_stream_t *)&stream, &out) &&
-           out == 1);
-    assert(CYNTA_STREAM_SUCCESS ==
-           cynta_stream_rewind((cynta_stream_t *)&stream));
+           cynta_stream_begin_transaction((cynta_stream_t *)&stream,
+                                          test_stream_0, NULL));
     assert(CYNTA_STREAM_SUCCESS ==
                cynta_stream_next((cynta_stream_t *)&stream, &out) &&
            out == 1);
-
     assert(CYNTA_STREAM_SUCCESS ==
-           cynta_stream_push_checkpoint((cynta_stream_t *)&stream));
-    assert(CYNTA_STREAM_SUCCESS ==
-               cynta_stream_next((cynta_stream_t *)&stream, &out) &&
-           out == 2);
-    assert(CYNTA_STREAM_SUCCESS ==
-           cynta_stream_push_checkpoint((cynta_stream_t *)&stream));
-    assert(CYNTA_STREAM_SUCCESS ==
-               cynta_stream_next((cynta_stream_t *)&stream, &out) &&
-           out == 3);
-    assert(CYNTA_STREAM_SUCCESS ==
-           cynta_stream_rewind((cynta_stream_t *)&stream));
-    assert(CYNTA_STREAM_SUCCESS ==
-               cynta_stream_next((cynta_stream_t *)&stream, &out) &&
-           out == 3);
-    assert(CYNTA_STREAM_SUCCESS ==
-           cynta_stream_rewind((cynta_stream_t *)&stream));
+           cynta_stream_begin_transaction((cynta_stream_t *)&stream,
+                                          test_stream_2, NULL));
     assert(CYNTA_STREAM_SUCCESS ==
                cynta_stream_next((cynta_stream_t *)&stream, &out) &&
            out == 2);
     assert(CYNTA_STREAM_SUCCESS ==
                cynta_stream_next((cynta_stream_t *)&stream, &out) &&
            out == 3);
-
     assert(CYNTA_STREAM_SUCCESS ==
-           cynta_stream_push_checkpoint((cynta_stream_t *)&stream));
+           cynta_stream_begin_transaction((cynta_stream_t *)&stream,
+                                          test_stream_4, NULL));
     assert(CYNTA_STREAM_SUCCESS ==
                cynta_stream_next((cynta_stream_t *)&stream, &out) &&
            out == 4);
@@ -65,40 +111,14 @@ static void test_stream(void) {
                cynta_stream_next((cynta_stream_t *)&stream, &out) &&
            out == 5);
     assert(CYNTA_STREAM_SUCCESS ==
-           cynta_stream_push_checkpoint((cynta_stream_t *)&stream));
-    assert(CYNTA_STREAM_SUCCESS ==
-               cynta_stream_next((cynta_stream_t *)&stream, &out) &&
-           out == 6);
-    assert(CYNTA_STREAM_SUCCESS ==
-           cynta_stream_discard_checkpoint((cynta_stream_t *)&stream));
-    assert(CYNTA_STREAM_SUCCESS ==
-               cynta_stream_next((cynta_stream_t *)&stream, &out) &&
-           out == 7);
-    assert(CYNTA_STREAM_SUCCESS ==
-           cynta_stream_rewind((cynta_stream_t *)&stream));
-    assert(CYNTA_STREAM_SUCCESS ==
-               cynta_stream_next((cynta_stream_t *)&stream, &out) &&
-           out == 4);
-    assert(CYNTA_STREAM_SUCCESS ==
-               cynta_stream_next((cynta_stream_t *)&stream, &out) &&
-           out == 5);
-    assert(CYNTA_STREAM_SUCCESS ==
-           cynta_stream_push_checkpoint((cynta_stream_t *)&stream));
+           cynta_stream_begin_transaction((cynta_stream_t *)&stream,
+                                          test_stream_5, NULL));
     assert(CYNTA_STREAM_SUCCESS ==
                cynta_stream_next((cynta_stream_t *)&stream, &out) &&
            out == 6);
     assert(CYNTA_STREAM_SUCCESS ==
                cynta_stream_next((cynta_stream_t *)&stream, &out) &&
            out == 7);
-    assert(CYNTA_STREAM_SUCCESS ==
-           cynta_stream_rewind((cynta_stream_t *)&stream));
-    assert(CYNTA_STREAM_SUCCESS ==
-               cynta_stream_next((cynta_stream_t *)&stream, &out) &&
-           out == 6);
-    assert(CYNTA_STREAM_SUCCESS ==
-               cynta_stream_next((cynta_stream_t *)&stream, &out) &&
-           out == 7);
-
     assert(CYNTA_STREAM_ERROR_END_OF_STREAM ==
            cynta_stream_next((cynta_stream_t *)&stream, &out));
 }

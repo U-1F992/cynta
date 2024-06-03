@@ -5,49 +5,6 @@
 #define PUSH(stack, value) ((stack)[(stack##_size)++] = (value))
 #define POP(stack) ((stack)[--(stack##_size)])
 
-cynta_stream_error_t cynta_stream_push_checkpoint(cynta_stream_t *stream) {
-    if (stream == NULL) {
-        return CYNTA_STREAM_ERROR_NULL_POINTER;
-    }
-
-    if (stream->checkpoints_size >=
-        CYNTA_STREAM_BACKTRACK_CHECKPOINTS_CAPACITY) {
-        return CYNTA_STREAM_ERROR_OUT_OF_CAPACITY;
-    }
-
-    PUSH(stream->checkpoints, stream->history_index);
-
-    return CYNTA_STREAM_SUCCESS;
-}
-
-cynta_stream_error_t cynta_stream_rewind(cynta_stream_t *stream) {
-    if (stream == NULL) {
-        return CYNTA_STREAM_ERROR_NULL_POINTER;
-    }
-
-    if (stream->checkpoints_size == 0) {
-        return CYNTA_STREAM_ERROR_NO_CHECKPOINT;
-    }
-
-    stream->history_index = POP(stream->checkpoints);
-
-    return CYNTA_STREAM_SUCCESS;
-}
-
-cynta_stream_error_t cynta_stream_discard_checkpoint(cynta_stream_t *stream) {
-    if (stream == NULL) {
-        return CYNTA_STREAM_ERROR_NULL_POINTER;
-    }
-
-    if (stream->checkpoints_size == 0) {
-        return CYNTA_STREAM_ERROR_NO_CHECKPOINT;
-    }
-
-    POP(stream->checkpoints);
-
-    return CYNTA_STREAM_SUCCESS;
-}
-
 cynta_stream_error_t cynta_stream_begin_transaction(
     cynta_stream_t *stream,
     cynta_transaction_status_t (*transaction)(cynta_stream_t *, void *),
